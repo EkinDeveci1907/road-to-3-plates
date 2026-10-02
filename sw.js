@@ -1,5 +1,5 @@
 // Road to 3 Plates, offline support. Change VERSION whenever index.html changes.
-const VERSION = 'r3p-v3';
+const VERSION = 'r3p-v4';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 const CACHE_HOSTS = ['raw.githubusercontent.com'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
@@ -12,6 +12,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.endsWith('/logs.json')) { e.respondWith(fetch(req).catch(() => caches.match(req))); return; }
   if (req.mode === 'navigate') { e.respondWith(fetch(req).then((res) => { const copy = res.clone(); caches.open(VERSION).then((c) => c.put('./index.html', copy)); return res; }).catch(() => caches.match('./index.html'))); return; }
   e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req, copy)); return res; })));
 });
