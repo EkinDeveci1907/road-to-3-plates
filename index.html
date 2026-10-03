@@ -19,11 +19,10 @@
   --f:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",system-ui,"Segoe UI",Roboto,sans-serif;
   --r:20px;--rc:12px;--ease:cubic-bezier(.2,.8,.2,1);--fast:160ms;--med:260ms;--slow:420ms;
   --tab:60px;--finish:72px;color-scheme:dark;box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
 *,*::before,*::after{box-sizing:border-box}
-html{height:100%;background:var(--bg);scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
-body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font:400 16px/1.5 var(--f);-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;-webkit-font-smoothing:antialiased}
+html{height:100%;overflow:hidden;background:var(--bg);-webkit-text-size-adjust:100%}
+body{margin:0;position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden;padding-top:env(safe-area-inset-top,0px);background:var(--bg);color:var(--tx);font:400 16px/1.5 var(--f);-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-user-select:none;user-select:none;touch-action:manipulation;transition:transform var(--fast) var(--ease),background var(--fast),color var(--fast),border-color var(--fast),opacity var(--fast)}
 button:active{transform:scale(.97)}
 input{font:inherit;color:inherit}
@@ -33,8 +32,11 @@ svg{display:block}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .skip{position:absolute;left:16px;top:calc(8px + env(safe-area-inset-top,0px));z-index:20;background:var(--tx);color:var(--bg);padding:8px 12px;border-radius:var(--rc);transform:translateY(-200%)}
 .skip:focus{transform:none}
-.wrap{max-width:520px;margin:0 auto;padding:8px 16px calc(var(--tab) + 40px + env(safe-area-inset-bottom,0px))}
-body.has-finish .wrap{padding-bottom:calc(var(--tab) + var(--finish) + 96px + env(safe-area-inset-bottom,0px))}
+.scroller{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+.wrap{max-width:520px;margin:0 auto;padding:8px 16px 40px}
+body.timer-on .wrap{padding-bottom:110px}
+body.has-finish .wrap{padding-bottom:40px}
+body.has-finish.timer-on .wrap{padding-bottom:110px}
 .num{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 
 /* ---------- motion ---------- */
@@ -167,15 +169,15 @@ h1{font-size:30px;line-height:1.15;font-weight:700;letter-spacing:-.02em;margin:
 .receipt .actions{display:flex;gap:8px;flex-wrap:wrap}
 
 /* ---------- finish / tabs / timer / toast ---------- */
-.finish{position:fixed;left:0;right:0;bottom:calc(var(--tab) + env(safe-area-inset-bottom,0px));z-index:6;background:var(--bg);border-top:1px solid var(--ln);transform:translateY(110%);visibility:hidden;transition:transform var(--med) var(--ease),visibility 0s var(--med)}
-.finish.show{transform:none;visibility:visible;transition-delay:0s}
+.finish{position:relative;flex:none;z-index:6;background:var(--bg);border-top:1px solid var(--ln);display:none}
+.finish.show{display:block;animation:fadeUp var(--med) var(--ease)}
 .finish__in{max-width:520px;margin:0 auto;height:var(--finish);padding:0 16px;display:flex;align-items:center;gap:12px}
 .finish__meta{flex:1;min-width:0;font-size:13px;color:var(--tx2)}
 .finish__meta b{color:var(--tx);font-variant-numeric:tabular-nums}
 .bar{height:3px;background:var(--sf3);border-radius:2px;margin-top:8px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--ac);border-radius:2px;transition:width var(--slow) var(--ease)}
 .finish .btn{flex:0 0 auto;white-space:nowrap;padding:0 18px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:7;background:var(--bg);border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs{position:relative;flex:none;z-index:7;background:var(--bg);border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom,0px)}
 .tabs ul{list-style:none;margin:0 auto;padding:0;max-width:520px;display:grid;grid-template-columns:repeat(4,1fr);height:var(--tab)}
 .tabs button{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--tx3);font-size:11px;font-weight:600;border-radius:0}
 .tabs button:active{transform:none}
@@ -301,10 +303,10 @@ body.has-finish .timer{bottom:calc(var(--tab) + var(--finish) + 10px + env(safe-
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<div class="wrap">
+<div class="scroller" id="scroller"><div class="wrap">
   <header class="top"><p class="brand">Road to 3 Plates</p><div class="dots" id="weeks" aria-label="Week progress"></div></header>
   <main id="main" tabindex="-1"></main>
-</div>
+</div></div>
 
 <div class="timer" id="timer" aria-hidden="true">
   <div class="timer__in">
@@ -411,7 +413,7 @@ function fmtRest(s){var m=Math.floor(s/60),x=s%60;return m?(x?m+':'+pad(x):m+':0
 function lbs(n){return Math.round(n).toLocaleString('en-CA')}
 var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:'r235.drafts',sessions:'r235.sessions',bw:'r235.bw',checks:'r235.checks',seeded:'r235.seeded',hint:'r235.hideInstall'};
-var APP_VERSION='1.6 (Oct 3)';
+var APP_VERSION='1.7 (Oct 3)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
@@ -505,7 +507,7 @@ function videoLink(rex){
 }
 
 /* ================= views ================= */
-var main=document.getElementById('main'),weeksEl=document.getElementById('weeks'),finishEl=document.getElementById('finish'),finishMeta=document.getElementById('finishMeta'),finishBtn=document.getElementById('finishBtn');
+var SC=document.getElementById('scroller'),main=document.getElementById('main'),weeksEl=document.getElementById('weeks'),finishEl=document.getElementById('finish'),finishMeta=document.getElementById('finishMeta'),finishBtn=document.getElementById('finishBtn');
 var CHECK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>', CHEV='<svg class="ex__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 function renderWeeks(ds){var wi=weekIndex(ds),h='';if(wi>=0&&wi<=10){for(var i=0;i<11;i++)h+='<i class="'+(i<wi?'on':i===wi?'now':'')+'"></i>';h+='<span>wk '+(wi+1)+'</span>';}weeksEl.innerHTML=h;}
 function lastBlock(rex,before){
@@ -657,7 +659,7 @@ function renderHistory(){
   h+='<section class="card" aria-labelledby="data-h"><h2 id="data-h">Your data</h2><p class="fine" style="margin-top:6px">Your workouts are saved on this phone. Deleting the app from your Home Screen erases them, so back up every week or two.</p>'+
     '<p class="fine">Last backup: <b style="color:'+(stale?'var(--red)':'var(--tx)')+'">'+(lbk?esc(fmt(lbk,{weekday:'short',month:'short',day:'numeric'})):'never')+'</b></p>'+
     '<div class="actions-row"><button type="button" class="btn btn--ghost" data-act="backup">Back up now</button><button type="button" class="btn btn--ghost" data-act="restore">Restore</button><button type="button" class="btn btn--ghost" data-act="csv">Export CSV</button></div>'+
-    '<p class="fine">App version '+APP_VERSION+'</p></section>';
+    cloudCard()+'<p class="fine">App version '+APP_VERSION+'</p></section>';
   h+='</div>';main.innerHTML=h;
 }
 function dayDetail(ds,ses){
@@ -678,7 +680,7 @@ function openWorkout(key,date,start){
   S.activeKey=key;var d=draftFor(key);
   if(date&&d.date!==date){var busy=!d.saved&&Object.keys(d.ex).some(function(n){return (d.ex[n].sets||[]).some(function(x){return x.done})});if(!busy){d={date:date,created:todayStr(),ex:{},swap:{},extra:[]};S.drafts[key]=d;}}
   if(start&&!d.startedAt&&!d.saved)d.startedAt=Date.now();
-  saveDrafts();S.openEx={};S.tab='today';render();window.scrollTo(0,0);if(start)toast('Workout started. Tap \u2713 after each set.');
+  saveDrafts();S.openEx={};S.tab='today';render();SC.scrollTop=0;if(start)toast('Workout started. Tap \u2713 after each set.');
 }
 function editSession(id){
   var s=S.sessions.filter(function(x){return x.id===id})[0];if(!s||!WORKOUTS.some(function(x){return x.key===s.key}))return;
@@ -687,12 +689,12 @@ function editSession(id){
     var sets=(e.sets||[]).map(function(x){return {w:x.w==null?'':String(x.w),r:x.r==null?'':String(x.r),done:true};});
     if(r)d.ex[r.key]={sets:sets.length?sets:[{w:'',r:'',done:false}],note:e.note||''};
     else{d.extra.push({name:e.name,sets:Math.max(1,sets.length),reps:'8\u201312',rest:90});d.ex['extra:'+(d.extra.length-1)]={sets:sets.length?sets:[{w:'',r:'',done:false}],note:e.note||''};}});
-  S.drafts[w.key]=d;saveDrafts();S.activeKey=w.key;S.openEx={};S.tab='today';render();window.scrollTo(0,0);
+  S.drafts[w.key]=d;saveDrafts();S.activeKey=w.key;S.openEx={};S.tab='today';render();SC.scrollTop=0;
   toast('Editing '+w.name+' from '+fmt(s.date)+'. Change anything, then tap Save changes.');
 }
 function render(){document.querySelectorAll('.tabs button').forEach(function(b){if(b.dataset.tab===S.tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});({today:renderToday,progress:renderProgress,history:renderHistory,food:renderFood})[S.tab]();if(S.tab!=='today')updateFinish();countUp();}
 function countUp(){if(reduced)return;main.querySelectorAll('[data-count]').forEach(function(el){var to=+el.dataset.count,t0=performance.now(),dur=650;if(!(to>0))return;function f(t){var k=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e).toLocaleString('en-CA');if(k<1)requestAnimationFrame(f);}requestAnimationFrame(f);});}
-function keepScroll(fn){var y=window.scrollY;fn();window.scrollTo(0,y)}
+function keepScroll(fn){var y=SC.scrollTop;fn();SC.scrollTop=y}
 function refocus(sel){var el=main.querySelector(sel);if(el)el.focus({preventScroll:true});}
 /* surgical update after a set is checked, so the expand/check animations aren't reset */
 function patchSet(i,si){
@@ -719,10 +721,10 @@ function tick(){var left=Math.round((T.end-Date.now())/1000);
   if(left<=0){timerTime.innerHTML='Go<small>Next set</small>';timerEl.classList.add('is-over');arc.setAttribute('stroke-dashoffset','0');if(!T.beeped){T.beeped=true;beep();toast('Rest over. Next set.');}if(left<-25)stopTimer();return;}
   timerEl.classList.remove('is-over');timerTime.innerHTML=Math.floor(left/60)+':'+pad(left%60)+'<small>Rest</small>';arc.setAttribute('stroke-dashoffset',String(C*(1-left/T.total)));}
 function startTimer(sec){try{var AC=window.AudioContext||window.webkitAudioContext;if(AC&&!T.ctx)T.ctx=new AC();if(T.ctx&&T.ctx.state==='suspended')T.ctx.resume();}catch(e){}
-  wakeOn();T.total=sec;T.end=Date.now()+sec*1000;T.beeped=false;timerEl.classList.add('show');timerEl.setAttribute('aria-hidden','false');clearInterval(T.iv);T.iv=setInterval(tick,250);tick();}
+  wakeOn();document.body.classList.add('timer-on');T.total=sec;T.end=Date.now()+sec*1000;T.beeped=false;timerEl.classList.add('show');timerEl.setAttribute('aria-hidden','false');clearInterval(T.iv);T.iv=setInterval(tick,250);tick();}
 var WL=null;function wakeOn(){try{if('wakeLock' in navigator&&!WL){navigator.wakeLock.request('screen').then(function(l){WL=l;l.addEventListener('release',function(){WL=null;});}).catch(function(){});}}catch(e){}}
 function wakeOff(){try{if(WL){WL.release();}}catch(e){}WL=null;}
-function stopTimer(){wakeOff();clearInterval(T.iv);T.iv=null;timerEl.classList.remove('show','is-over');timerEl.setAttribute('aria-hidden','true');}
+function stopTimer(){wakeOff();document.body.classList.remove('timer-on');clearInterval(T.iv);T.iv=null;timerEl.classList.remove('show','is-over');timerEl.setAttribute('aria-hidden','true');}
 timerEl.addEventListener('click',function(ev){var b=ev.target.closest('button');if(!b)return;if(b.dataset.t==='add'){T.end=Math.max(T.end,Date.now())+30000;T.total+=30;T.beeped=false;tick();}else stopTimer();});
 
 /* ================= storage ================= */
@@ -730,7 +732,7 @@ function persist(){var ok=LS.set(K.sessions,S.sessions)&&LS.set(K.bw,S.bw)&&LS.s
 function setChecks(mut){var t=todayStr(),all=JSON.parse(JSON.stringify(S.checks||{}));all[t]=all[t]||{};mut(all[t]);var keys=Object.keys(all).sort(),trimmed={};keys.slice(-90).forEach(function(k){trimmed[k]=all[k]});S.checks=trimmed;persist();}
 
 /* ================= events ================= */
-document.querySelector('.tabs').addEventListener('click',function(ev){var b=ev.target.closest('button');if(!b||b.dataset.tab===S.tab)return;S.tab=b.dataset.tab;S.swapOpen=null;S.addOpen=false;S.calSel=null;S.calMonth=null;render();window.scrollTo(0,0);main.focus({preventScroll:true});});
+document.querySelector('.tabs').addEventListener('click',function(ev){var b=ev.target.closest('button');if(!b||b.dataset.tab===S.tab)return;S.tab=b.dataset.tab;S.swapOpen=null;S.addOpen=false;S.calSel=null;S.calMonth=null;render();SC.scrollTop=0;main.focus({preventScroll:true});});
 main.addEventListener('input',function(ev){var el=ev.target,f=el.dataset.f;if(S.tab!=='today'||!f)return;var d=draftFor(S.activeKey);
   if(f==='date'){if(el.value){d.date=el.value;saveDrafts();}return;}var sec=el.closest('[data-ex]');if(!sec)return;var w=workout(S.activeKey),rex=exList(w,d)[+sec.dataset.ex],e=exDraft(d,rex);
   if(f==='note'){e.note=el.value;saveDrafts();return;}var s=e.sets[+el.closest('.set').dataset.set];s[f]=el.value.replace(',','.');saveDrafts();});
@@ -740,7 +742,7 @@ main.addEventListener('click',function(ev){
   var b=ev.target.closest('button');if(!b)return;var act=b.dataset.act;
   if(b.dataset.key){if(b.dataset.key===S.activeKey)return;S.activeKey=b.dataset.key;S.swapOpen=null;S.addOpen=false;var th=main.querySelector('.seg__thumb'),idx=WORKOUTS.findIndex(function(x){return x.key===b.dataset.key});if(th&&!reduced){th.style.transform='translateX('+(idx*100)+'%)';setTimeout(function(){keepScroll(renderToday)},160);}else keepScroll(renderToday);return;}
   if(act==='hidehint'){LS.set(K.hint,true);keepScroll(renderToday);return;}
-  if(act==='goprogress'){S.tab='progress';render();window.scrollTo(0,0);return;}
+  if(act==='goprogress'){S.tab='progress';render();SC.scrollTop=0;return;}
   if(S.tab==='today'){var d=draftFor(S.activeKey),w=workout(S.activeKey);
     if(act==='undo-save'){undoSave(w,d);return;}
     if(act==='addopen'){S.addOpen=true;keepScroll(renderToday);refocus('#addIn');return;}
@@ -769,8 +771,8 @@ main.addEventListener('click',function(ev){
     if(act==='bwdel'){var dt=b.dataset.date,keep=S.bw.slice();S.bw=S.bw.filter(function(x){return x.date!==dt});persist();keepScroll(renderProgress);toast('Weigh-in removed','Undo',function(){S.bw=keep;persist();keepScroll(renderProgress);});return;}}
   if(S.tab==='food'){if(b.dataset.p){var g=+b.dataset.p;setChecks(function(day){day.protein=(day.protein||0)+g;day.pLog=(day.pLog||[]).concat([g]);});keepScroll(renderFood);return;}
     if(act==='pundo'){setChecks(function(day){var l=day.pLog||[];if(l.length){day.protein=Math.max(0,(day.protein||0)-l[l.length-1]);day.pLog=l.slice(0,-1);}});keepScroll(renderFood);return;}}
-  if(S.tab==='history'){if(act==='moprev'||act==='monext'){S.calMonth=new Date(S.calMonth.getFullYear(),S.calMonth.getMonth()+(act==='moprev'?-1:1),1);keepScroll(renderHistory);return;}if(act==='day'){S.calSel=b.dataset.date;var pd=parseYmd(S.calSel);if(pd.getMonth()!==S.calMonth.getMonth())S.calMonth=new Date(pd.getFullYear(),pd.getMonth(),1);keepScroll(renderHistory);return;}if(act==='openday'){openWorkout(b.dataset.wk,b.dataset.date,b.dataset.start==='1');return;}if(act==='edit'){editSession(b.dataset.id);return;}if(act==='hist'){S.openHist[b.dataset.id]=!S.openHist[b.dataset.id];keepScroll(renderHistory);return;}
-    if(act==='del'){var id=b.dataset.id,gone=S.sessions.filter(function(x){return x.id===id})[0];S.sessions=S.sessions.filter(function(x){return x.id!==id});persist();keepScroll(renderHistory);toast('Workout deleted','Undo',function(){S.sessions.push(gone);persist();keepScroll(renderHistory);});return;}
+  if(S.tab==='history'){if(act==='cloudon'){cloudConnect();return;}if(act==='cloudoff'){LS.set('r235.cloudUrl','');CLD.err='';keepScroll(renderHistory);toast('Sync turned off. Your workouts stay on this phone.');return;}if(act==='cloudsync'){syncCloud(true);return;}if(act==='moprev'||act==='monext'){S.calMonth=new Date(S.calMonth.getFullYear(),S.calMonth.getMonth()+(act==='moprev'?-1:1),1);keepScroll(renderHistory);return;}if(act==='day'){S.calSel=b.dataset.date;var pd=parseYmd(S.calSel);if(pd.getMonth()!==S.calMonth.getMonth())S.calMonth=new Date(pd.getFullYear(),pd.getMonth(),1);keepScroll(renderHistory);return;}if(act==='openday'){openWorkout(b.dataset.wk,b.dataset.date,b.dataset.start==='1');return;}if(act==='edit'){editSession(b.dataset.id);return;}if(act==='hist'){S.openHist[b.dataset.id]=!S.openHist[b.dataset.id];keepScroll(renderHistory);return;}
+    if(act==='del'){var id=b.dataset.id,gone=S.sessions.filter(function(x){return x.id===id})[0];S.sessions=S.sessions.filter(function(x){return x.id!==id});tombAdd(id);persist();keepScroll(renderHistory);syncCloud();toast('Workout deleted','Undo',function(){tombDel(id);gone.savedAt=Math.max(gone.savedAt||0,1);S.sessions.push(gone);persist();keepScroll(renderHistory);syncCloud();});return;}
     if(act==='backup'){LS.set('r235.lastBackup',todayStr());setTimeout(function(){keepScroll(renderHistory)},400);}if(act==='backup')return shareFile('road-to-3-plates-backup-'+todayStr()+'.json',JSON.stringify({app:'road-to-235',version:3,sessions:S.sessions,bw:S.bw,checks:S.checks}),'application/json');
     if(act==='csv')return shareFile('road-to-3-plates-logs.csv',toCsv(),'text/csv');
     if(act==='restore')return document.getElementById('restoreIn').click();}
@@ -792,14 +794,44 @@ function doSave(){
   var mins=(prior&&prior.mins)||(d.startedAt?Math.max(1,Math.round((Date.now()-d.startedAt)/60000)):0);if(mins>240)mins=0;
   var sess={id:id,date:d.date,key:w.key,title:w.name,plan:'new',week:weekIndex(d.date)+1,exercises:exs,prs:prs,mins:mins||null,savedAt:Date.now()};
   S.sessions=S.sessions.filter(function(x){return x.id!==id}).concat([sess]);if(!persist())return;
-  S.undo={id:id,prior:prior,wasSaved:!!d.saved};d.saved=true;saveDrafts();stopTimer();window.scrollTo(0,0);renderToday();toast(prior?'Changes saved':w.name+' saved');
+  S.undo={id:id,prior:prior,wasSaved:!!d.saved};d.saved=true;saveDrafts();stopTimer();syncCloud();SC.scrollTop=0;renderToday();toast(prior?'Changes saved':w.name+' saved');
 }
-function undoSave(w,d){var id=d.date+'-'+w.key,u=S.undo&&S.undo.id===id?S.undo:null;S.sessions=S.sessions.filter(function(x){return x.id!==id});if(u&&u.prior)S.sessions.push(u.prior);persist();d.saved=u?u.wasSaved:false;saveDrafts();S.undo=null;keepScroll(renderToday);toast('Save undone. Your sets are still here.');}
+function undoSave(w,d){var id=d.date+'-'+w.key,u=S.undo&&S.undo.id===id?S.undo:null;S.sessions=S.sessions.filter(function(x){return x.id!==id});if(u&&u.prior){u.prior.savedAt=Date.now();S.sessions.push(u.prior);}else tombAdd(id);persist();d.saved=u?u.wasSaved:false;saveDrafts();S.undo=null;keepScroll(renderToday);syncCloud();toast('Save undone. Your sets are still here.');}
 function syncSheet(){try{fetch('logs.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(list){if(!Array.isArray(list))return;var byId={},changed=false;S.sessions.forEach(function(s){byId[s.id]=s});list.forEach(function(o){if(!o||!o.id||!o.date)return;var ex=byId[o.id];if(ex&&ex.src!=='sheet')return;var s={id:o.id,date:o.date,key:o.key||'old',plan:o.plan||'new',title:o.title||'Workout',src:'sheet',savedAt:0,exercises:(o.exercises||[]).map(function(e){return {name:e[0],sets:(e[1]||[]).map(function(x){return {w:x[0],r:x[1]}}),note:e[2]||''}})};if(!ex||JSON.stringify(ex.exercises)!==JSON.stringify(s.exercises)){byId[o.id]=s;changed=true;}});if(changed){S.sessions=Object.keys(byId).map(function(k){return byId[k]});persist();render();}}).catch(function(){});}catch(e){}}
-if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(reg){document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){reg.update().catch(function(){});syncSheet();if(T.iv)wakeOn();}});}).catch(function(){});var had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',function(){if(had)toast('New version ready','Reload',function(){location.reload();},20000);had=true;});});}
+if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(reg){document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){reg.update().catch(function(){});syncSheet();syncCloud();if(T.iv)wakeOn();}});}).catch(function(){});var had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',function(){if(had)toast('New version ready','Reload',function(){location.reload();},20000);had=true;});});}
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+function resetViewport(){if(window.scrollY||document.documentElement.scrollTop||document.body.scrollTop){window.scrollTo(0,0);document.body.scrollTop=0;}}
+document.addEventListener('focusout',function(){setTimeout(function(){var a=document.activeElement;if(!a||a.tagName!=='INPUT')resetViewport();},80);});
+if(window.visualViewport)window.visualViewport.addEventListener('resize',function(){if(window.visualViewport.height>=window.innerHeight-2)resetViewport();});
+var CLD={busy:false,err:''};
+function cloudUrl(){return LS.get('r235.cloudUrl','')}
+function tombAdd(id){var t=LS.get('r235.tomb',[]);if(t.indexOf(id)<0){t.push(id);LS.set('r235.tomb',t);}}
+function tombDel(id){LS.set('r235.tomb',LS.get('r235.tomb',[]).filter(function(x){return x!==id}));}
+function cloudPost(body){var u=cloudUrl();if(!u)return Promise.resolve(false);return fetch(u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json()}).then(function(j){return !!(j&&j.ok)}).catch(function(){return false});}
+function ownLocal(s){return !!s&&s.key!=='old'&&s.src!=='sheet'&&(s.savedAt||0)>0;}
+function safeRender(){var a=document.activeElement;if(a&&a.tagName==='INPUT'&&main.contains(a))return;keepScroll(render);}
+function ago(ms){var m=Math.round((Date.now()-ms)/60000);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' days ago';}
+function syncCloud(manual){var u=cloudUrl();if(!u||CLD.busy)return;CLD.busy=true;
+  fetch(u+(u.indexOf('?')>=0?'&':'?')+'t='+Date.now()).then(function(r){return r.json()}).then(function(j){
+    if(!j||!j.ok)throw new Error('bad');
+    var tomb=LS.get('r235.tomb',[]),byId={},changed=false,push=[],cloudIds={};
+    S.sessions.forEach(function(x){byId[x.id]=x});
+    (j.app||[]).forEach(function(c){if(!c||!c.id)return;cloudIds[c.id]=c.savedAt||0;if(tomb.indexOf(c.id)>=0)return;var l=byId[c.id];if(!l||(c.savedAt||0)>(l.savedAt||0)){byId[c.id]=c;changed=true;}});
+    (j.sheet||[]).forEach(function(o){if(!o||!o.id)return;var l=byId[o.id];if(l&&l.src!=='sheet')return;if(!l||JSON.stringify(l.exercises)!==JSON.stringify(o.exercises)){byId[o.id]=o;changed=true;}});
+    Object.keys(byId).forEach(function(id){var x=byId[id];if(ownLocal(x)&&(!(id in cloudIds)||(x.savedAt||0)>cloudIds[id]))push.push(x);});
+    if(changed){S.sessions=Object.keys(byId).map(function(k){return byId[k]});persist();}
+    var p=push.length?cloudPost({action:'save',sessions:push}):Promise.resolve(true);
+    return p.then(function(ok1){if(!tomb.length)return ok1;return cloudPost({action:'delete',ids:tomb}).then(function(ok2){if(ok2)LS.set('r235.tomb',[]);return ok1&&ok2;});}).then(function(ok){if(!ok)throw new Error('post');LS.set('r235.cloudAt',Date.now());CLD.err='';if(changed||S.tab==='history')safeRender();if(manual)toast('Synced with your Google Sheet');});
+  }).catch(function(){CLD.err='Couldn\u2019t reach your sheet';if(S.tab==='history')safeRender();if(manual)toast('Sync failed. Check your signal and the link.');}).then(function(){CLD.busy=false;});}
+function cloudConnect(){var el=document.getElementById('cloudIn'),u=(el&&el.value||'').trim();
+  if(!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec/.test(u)&&!/^http:\/\/localhost/.test(u)){toast('Paste the Web app link from Apps Script. It starts with https://script.google.com/macros/s/');return;}
+  LS.set('r235.cloudUrl',u);CLD.err='';keepScroll(renderHistory);toast('Connecting to your sheet\u2026');syncCloud(true);}
+function cloudCard(){var u=cloudUrl(),at=LS.get('r235.cloudAt',0),top='<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--ln)">';
+  if(u)return top+'<p class="fine" style="margin-top:0"><b style="color:var(--tx)">Google Sheet sync is on.</b> '+(CLD.err?esc(CLD.err)+'.':at?'Last synced '+ago(at)+'.':'Syncing\u2026')+' Finished workouts are saved to the \u201cApp log\u201d tab, and workouts you type into the sheet show up here.</p><div class="actions-row"><button type="button" class="btn btn--ghost" data-act="cloudsync">Sync now</button><button type="button" class="btn btn--ghost" data-act="cloudoff">Turn off sync</button></div></div>';
+  return top+'<label class="flabel" for="cloudIn" style="margin-top:0">Sync with your Google Sheet: paste its link</label><div class="inline" style="margin-top:0"><input class="field" id="cloudIn" type="url" placeholder="https://script.google.com/macros/s/\u2026" autocomplete="off"><button type="button" class="btn" data-act="cloudon">Connect</button></div><p class="fine">Once connected, every workout is also saved in your sheet, so nothing is lost if your phone is.</p></div>';}
 render();
 syncSheet();
+syncCloud();
 })();
 </script>
 </body>
