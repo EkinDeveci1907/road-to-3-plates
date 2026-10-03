@@ -78,6 +78,7 @@ h1{font-size:30px;line-height:1.15;font-weight:700;letter-spacing:-.02em;margin:
 .hero{position:relative;overflow:hidden}
 .hero__num{display:flex;align-items:baseline;gap:10px;margin-top:6px}
 .hero__num .w{font-size:72px;line-height:1;font-weight:700;letter-spacing:-.045em}
+.hero__num .lb{font-size:22px;font-weight:600;letter-spacing:0;color:var(--tx2);margin-left:5px}
 .hero__num .u{color:var(--tx2);font-size:15px;line-height:1.3}
 .hero__num .u b{display:block;color:var(--tx);font-size:22px;font-weight:600;letter-spacing:-.02em}
 .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:14px}
@@ -210,7 +211,7 @@ body.has-finish .timer{bottom:calc(var(--tab) + var(--finish) + 10px + env(safe-
 .track b.hit{background:var(--ac)}
 .track b:last-of-type span{left:auto;right:-1px;transform:none}
 .miles{list-style:none;margin:8px 0 0;padding:0}
-.miles li{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--ln);font-size:14px}
+.miles li{display:grid;grid-template-columns:68px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--ln);font-size:14px}
 .miles b{font-weight:600;font-variant-numeric:tabular-nums}
 .miles .ok{color:var(--ac);font-weight:600}.miles .nx{color:var(--tx);font-weight:600}
 .miles .muted{color:var(--tx3)}
@@ -298,6 +299,7 @@ body.has-finish .timer{bottom:calc(var(--tab) + var(--finish) + 10px + env(safe-
 .wsum b{display:block;font-size:24px;font-weight:700;letter-spacing:-.02em}
 .wsum span{font-size:12px;color:var(--tx3)}
 .delta{grid-column:1 / -1;margin:6px 0 0;font-size:13px;color:var(--tx2)}
+@media (max-width:360px){.card{padding:16px}.hero .loop{margin:-16px -16px 16px}.ex__inner{padding:0 16px 16px}.sethead,.set{grid-template-columns:12px minmax(0,1.3fr) minmax(0,1fr) 40px;gap:6px}.step{grid-template-columns:26px minmax(0,1fr) 26px}.step input{font-size:17px}.check{width:40px;height:40px}.ex__head{grid-template-columns:1fr 20px;padding:14px 14px 14px 16px}.ex__tg{grid-column:1;grid-row:auto;text-align:left;margin-top:2px}.ex__tg small{display:inline;margin-left:6px}.ex__chev{grid-column:2;grid-row:1 / span 3}}
 [hidden]{display:none !important}
 </style>
 </head>
@@ -359,16 +361,16 @@ var WORKOUTS=[
    {name:'Back extension (hyperextension)',label:'Back extension',sets:3,reps:'12–15',rest:60,bw:true,backext:true}]},
  {key:'upperB',day:'Thu',name:'Upper B',about:'Lighter bench, more reps',ex:[
    {name:'Bench press – volume',label:'Bench press',sub:'Volume',media:'Bench press',kind:'benchVol',rest:120,bar:true},
-   {name:'Incline DB press',sets:3,reps:'8–12',rest:120,hint:'Start with the 60s and keep your form clean.'},
+   {name:'Incline DB press',sets:3,reps:'8–12',rest:120,hint:'Start with the 60 lb dumbbells and keep your form clean.'},
    {name:'Lat pulldown',sets:3,reps:'10–12',rest:105},
    {name:'Chest-supported / machine row',sets:3,reps:'10–12',rest:105},
    {name:'Cable lateral raise',sets:4,reps:'12–20',rest:60},
    {name:'Rear delt cable',sets:2,reps:'12–15',rest:60},
-   {name:'Weighted dips',sets:3,reps:'8–12',rest:105,bw:true,hint:'Start at +30.'},
+   {name:'Weighted dips',sets:3,reps:'8–12',rest:105,bw:true,hint:'Start at +30 lbs.'},
    {name:'Incline DB curl',sets:3,reps:'10–12',rest:60}]},
  {key:'lowerB',day:'Fri',name:'Lower B',about:'Legs, arms and abs',ex:[
    {name:'Bulgarian split squat (per leg)',sets:3,reps:'8–10',rest:105,hint:'Start with 20–25 lb dumbbells.'},
-   {name:'Hip thrust',sets:3,reps:'8–12',rest:120,hint:'Start at 135.'},
+   {name:'Hip thrust',sets:3,reps:'8–12',rest:120,hint:'Start at 135 lbs.'},
    {name:'Leg extension',sets:3,reps:'12–15',rest:60},
    {name:'Seated leg curl',sets:3,reps:'10–12',rest:60},
    {name:'Seated calf raise',sets:3,reps:'12–15',rest:60},
@@ -413,7 +415,7 @@ function fmtRest(s){var m=Math.floor(s/60),x=s%60;return m?(x?m+':'+pad(x):m+':0
 function lbs(n){return Math.round(n).toLocaleString('en-CA')}
 var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:'r235.drafts',sessions:'r235.sessions',bw:'r235.bw',checks:'r235.checks',seeded:'r235.seeded',hint:'r235.hideInstall'};
-var APP_VERSION='1.7 (Oct 3)';
+var APP_VERSION='1.8 (Oct 3)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
@@ -421,7 +423,7 @@ function roadWeek(wi){
   var i=Math.max(0,wi); if(i>10) return null;
   var bt=BENCH_TOP[i],st=SQUAT_TOP[i],o={i:i,deload:i===DELOAD_WEEK};
   if(bt==='DL'){o.benchTop={w:185,reps:'3',sets:1,easy:true};o.benchBack={w:155,reps:'6',sets:1};o.benchVol={w:135,reps:'8',sets:2};}
-  else{var b=bt||[185,'5'];o.benchTop={w:b[0],reps:b[1],sets:1,done:!bt};o.benchBack={w:r5(b[0]*0.85),reps:i<6?'6–8':'5–6',sets:3};o.benchVol={w:r5(b[0]*0.72),reps:'8',sets:3};if(i===10)o.benchTop.extra='If 225 flies up, try 235 × 1–3 with a spotter.';}
+  else{var b=bt||[185,'5'];o.benchTop={w:b[0],reps:b[1],sets:1,done:!bt};o.benchBack={w:r5(b[0]*0.85),reps:i<6?'6–8':'5–6',sets:3};o.benchVol={w:r5(b[0]*0.72),reps:'8',sets:3};if(i===10)o.benchTop.extra='If 225 lbs flies up, try 235 lbs × 1–3 with a spotter.';}
   if(st==='DL'){o.squatTop={w:185,reps:'3',sets:1,easy:true};o.squatBack={w:155,reps:'6',sets:1};}
   else{o.squatTop={w:st[0],reps:st[1],sets:1};o.squatBack={w:r5(st[0]*0.85),reps:i<6?'6–8':'5–6',sets:3};}
   return o;
@@ -438,8 +440,8 @@ function resolveEx(ex,wi,before){
     var t=rw?rw[ex.kind]:null;
     if(!t){var lift=/bench/.test(ex.kind)?'bench':'squat',top=autoTop(lift,before);
       if(/Top/.test(ex.kind))t=top;else if(ex.kind==='benchVol')t={w:r5(top.w*0.72),reps:'8',sets:3};else t={w:r5(top.w*0.85),reps:'5–6',sets:3};
-      if(top.auto&&/Top/.test(ex.kind))r.hint='Last best top set '+top.from.w+' × '+top.from.r+'. Hit 3+ reps and it moves up 5.';}
-    r.sets=t.sets;r.reps=t.reps;r.w=t.w;r.easy=!!t.easy;r.target=t.sets===1?t.w+' × '+t.reps:t.sets+' × '+t.reps+' @ '+t.w;if(t.extra)r.hint=t.extra;return r;
+      if(top.auto&&/Top/.test(ex.kind))r.hint='Last best top set '+top.from.w+' lbs × '+top.from.r+'. Hit 3+ reps and it moves up 5 lbs.';}
+    r.sets=t.sets;r.reps=t.reps;r.w=t.w;r.easy=!!t.easy;r.target=t.sets===1?t.w+' lbs × '+t.reps:t.sets+' × '+t.reps+' @ '+t.w+' lbs';if(t.extra)r.hint=t.extra;return r;
   }
   r.sets=ex.sets;r.reps=ex.reps;r.w=null;
   if(ex.backext){var pl=wi<=0?0:wi===1?1:2;r.phw=pl*45;r.plates=pl;r.hint=pl?'Hold '+pl+' plate'+(pl>1?'s':'')+' ('+pl*45+' lbs) against your chest.':'Bodyweight.';}
@@ -492,10 +494,11 @@ function phWeight(rex,before){
   var last=lastTime(rex.name,before),lw=null;if(last)last.sets.forEach(function(s){if(s.w!=null&&(lw==null||s.w>lw))lw=s.w;});
   if(lw!=null)return String(lw);return START_W[rex.name]!=null?String(START_W[rex.name]):'';
 }
-function setsText(sets,bw){return (sets||[]).filter(function(x){return x.r}).map(function(x){var w=x.w==null?(bw?'BW':'–'):(bw?(x.w>0?'+'+x.w:'BW'):x.w);return w+'\u00a0×\u00a0'+x.r;}).join('  ·  ');}
+function setsText(sets,bw){return (sets||[]).filter(function(x){return x.r}).map(function(x){return wl(x.w,bw)+'\u00a0×\u00a0'+x.r;}).join('  ·  ');}
+function wl(w,bw){return w==null?(bw?'BW':'–'):bw?(w>0?'+'+w+'\u00a0lbs':'BW'):w+'\u00a0lbs';}
 function isBwName(n){return /pull-up|dip|leg raise|knee raise/i.test(n)}
 function platesOf(w){var rem=(w-45)/2,out=[];if(rem<0)return [];[45,35,25,10,5,2.5].forEach(function(p){while(rem>=p-1e-9){out.push(p);rem-=p;}});return out;}
-function plateChips(w){var p=platesOf(w);if(!p.length)return '<div class="chips"><span class="chip chip--muted">Empty bar</span></div>';return '<div class="chips" aria-label="Plates per side: '+p.join(', ')+'">'+p.map(function(x){return '<span class="chip num">'+x+'</span>'}).join('')+'<span class="chip chip--muted">per side</span></div>';}
+function plateChips(w){var p=platesOf(w);if(!p.length)return '<div class="chips"><span class="chip chip--muted">Empty bar (45 lbs)</span></div>';return '<div class="chips" aria-label="'+p.join(', ')+' lb plates on each side">'+p.map(function(x){return '<span class="chip num">'+x+' lb</span>'}).join('')+'<span class="chip chip--muted">each side</span></div>';}
 function mediaBlock(rex){
   var m=MEDIA[rex.media]||MEDIA[rex.base], yt='https://www.youtube.com/results?search_query='+encodeURIComponent(rex.label+' proper form');
   if(!m) return '';
@@ -513,7 +516,7 @@ function renderWeeks(ds){var wi=weekIndex(ds),h='';if(wi>=0&&wi<=10){for(var i=0
 function lastBlock(rex,before){
   var last=lastTime(rex.name,before);if(!last)return '';
   var b=bestSet(last.sets),t=setsText(last.sets,rex.bw);
-  return '<div class="last"><span class="k">LAST TIME</span><span class="v">'+esc(fmt(last.date,{weekday:'short',month:'short',day:'numeric'}))+(b?' · best <em>'+esc((rex.bw&&b.w===0?'BW':b.w)+'\u00a0×\u00a0'+b.r)+'</em>':'')+'</span>'+
+  return '<div class="last"><span class="k">LAST TIME</span><span class="v">'+esc(fmt(last.date,{weekday:'short',month:'short',day:'numeric'}))+(b?' · best <em>'+esc(wl(b.w,rex.bw)+'\u00a0×\u00a0'+b.r)+'</em>':'')+'</span>'+
     (t?'<span class="k">SETS</span><span class="v num" style="font-weight:500;color:var(--tx2)">'+esc(t)+'</span>':'')+(last.note?'<span class="n">“'+esc(last.note)+'”</span>':'')+'</div>';
 }
 function setRows(rex,e,before,idx){
@@ -545,7 +548,7 @@ function renderToday(){
   if(d.saved)h+=receipt(w,d);
   if(heroIdx===0){var rex=list[0],e=drafts[0],big=rex.sets===1;
     h+='<section class="card hero" data-ex="0" aria-labelledby="hero-h">'+mediaBlock(rex)+(S.prFlash==='0'?'<span class="pr" aria-hidden="true">NEW BEST</span>':'')+'<h2 id="hero-h" class="eyebrow">'+esc(rex.label)+' · '+esc(rex.sub)+'</h2>';
-    if(rex.w){h+='<p class="hero__num"><span class="sr">Target: '+esc(rex.target)+' pounds</span><span class="w num" aria-hidden="true">'+rex.w+'</span><span class="u" aria-hidden="true"><b>× '+esc(rex.reps)+'</b>'+(big?'lbs · 1 heavy set':'lbs · '+rex.sets+' sets')+(rex.easy?' · easy':'')+'</span></p>'+plateChips(rex.w);}
+    if(rex.w){h+='<p class="hero__num"><span class="sr">Target: '+esc(rex.target)+'</span><span class="w num" aria-hidden="true">'+rex.w+'<small class="lb">lbs</small></span><span class="u" aria-hidden="true"><b>× '+esc(rex.reps)+'</b>'+(big?'1 heavy set':rex.sets+' sets')+(rex.easy?' · easy':'')+'</span></p>'+plateChips(rex.w);}
     else h+='<p class="hint">'+esc(rex.target)+'</p>';
     if(rex.hint)h+='<p class="hint">'+esc(rex.hint)+'</p>';
     h+=lastBlock(rex,d.date)+videoLink(rex)+setRows(rex,e,d.date,0)+'</section>';}
@@ -554,8 +557,8 @@ function renderToday(){
     var e=drafts[i],open=S.openEx[w.key]===i,done=e.sets.filter(function(s){return s.done}).length,complete=done===e.sets.length&&done>0,last=lastTime(rex.name,d.date),b=last?bestSet(last.sets):null;
     h+='<li class="ex'+(open?' open':'')+(complete?' is-complete':'')+'" data-ex="'+i+'">'+(S.prFlash===String(i)?'<span class="pr" aria-hidden="true">NEW BEST</span>':'')+
       '<h2><button type="button" class="ex__head" data-act="toggle" aria-expanded="'+open+'" aria-controls="exb-'+i+'"><span class="ex__name">'+esc(rex.label)+(rex.sub&&rex.sub!=='Swapped in'&&rex.sub!=='Added today'?' <span style="color:var(--tx3);font-weight:500">'+esc(rex.sub)+'</span>':'')+'<span class="count" aria-hidden="true">'+e.sets.map(function(s){return '<i'+(s.done?' class="on"':'')+'></i>'}).join('')+'</span></span>'+
-      '<span class="ex__sub">'+(b?'Last <em class="num">'+esc((rex.bw&&b.w===0?'BW':b.w)+'\u00a0×\u00a0'+b.r)+'</em> · '+esc(fmt(last.date)):(last?'Last '+esc(fmt(last.date)):'No history yet'))+(rex.swapped?' · swapped':'')+'</span>'+
-      '<span class="ex__tg num">'+esc(rex.w?rex.w+' × '+rex.reps:rex.target)+'<small>'+esc(rex.w?rex.sets+' sets · rest '+fmtRest(rex.rest):'rest '+fmtRest(rex.rest))+'</small></span>'+CHEV+'</button></h2>';
+      '<span class="ex__sub">'+(b?'Last <em class="num">'+esc(wl(b.w,rex.bw)+'\u00a0×\u00a0'+b.r)+'</em> · '+esc(fmt(last.date)):(last?'Last '+esc(fmt(last.date)):'No history yet'))+(rex.swapped?' · swapped':'')+'</span>'+
+      '<span class="ex__tg num">'+esc(rex.w?rex.w+' lbs × '+rex.reps:rex.target)+'<small>'+esc(rex.w?rex.sets+' sets · rest '+fmtRest(rex.rest):'rest '+fmtRest(rex.rest))+'</small></span>'+CHEV+'</button></h2>';
     h+='<div class="ex__body" id="exb-'+i+'"><div><div class="ex__inner">'+mediaBlock(rex)+(rex.bar&&rex.w?plateChips(rex.w):'')+(rex.hint?'<p class="hint">'+esc(rex.hint)+'</p>':'')+lastBlock(rex,d.date)+videoLink(rex)+setRows(rex,e,d.date,i)+'</div></div></div></li>';});
   h+='<li class="ex add-row">'+(S.addOpen?'<label class="flabel" for="addIn">Add an exercise to today</label><div class="inline" style="margin:0 0 12px"><input class="field" id="addIn" placeholder="e.g. Chest fly machine" autocomplete="off"><button type="button" class="btn" data-act="addgo">Add</button></div>':'<button type="button" class="link" data-act="addopen" style="min-height:52px">+ Add exercise</button>')+'</li></ul>';
   h+='<label class="dateline">Logging this for <input type="date" data-f="date" value="'+esc(d.date)+'"></label></div>';
@@ -590,35 +593,35 @@ function chart(pts,goal,goalLabel,title){
   if(goal)s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(goal)+'" y2="'+Y(goal)+'" stroke="var(--ln2)" stroke-dasharray="3 5"/><text x="'+(W-R)+'" y="'+(Y(goal)-6)+'" font-size="11" text-anchor="end" fill="var(--tx3)">'+esc(goalLabel)+'</text>';
   var pathD=pts.map(function(p,i){return (i?'L':'M')+X(p.date)+' '+Y(p.v)}).join(' ');
   s+='<path d="'+pathD+' L'+X(pts[pts.length-1].date)+' '+(H-B)+' L'+X(pts[0].date)+' '+(H-B)+'Z" fill="rgba(250,250,250,.06)"/><path d="'+pathD+'" fill="none" stroke="var(--ac)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
-  var lp=pts[pts.length-1];s+='<circle cx="'+X(lp.date)+'" cy="'+Y(lp.v)+'" r="4" fill="var(--ac)"/><text x="'+Math.min(W-R,X(lp.date))+'" y="'+(Y(lp.v)-10)+'" font-size="12" font-weight="600" text-anchor="end" fill="var(--tx)">'+lp.v+'</text>';
+  var lp=pts[pts.length-1];s+='<circle cx="'+X(lp.date)+'" cy="'+Y(lp.v)+'" r="4" fill="var(--ac)"/><text x="'+Math.min(W-R,X(lp.date))+'" y="'+(Y(lp.v)-10)+'" font-size="12" font-weight="600" text-anchor="end" fill="var(--tx)">'+lp.v+' lbs</text>';
   s+='<text x="'+L+'" y="'+(H-4)+'" font-size="11" fill="var(--tx3)">'+esc(fmt(pts[0].date))+'</text><text x="'+(W-R)+'" y="'+(H-4)+'" font-size="11" text-anchor="end" fill="var(--tx3)">'+esc(fmt(lp.date))+'</text></svg>';
   return '<div class="chart">'+s+'</div>';
 }
 function weekResult(i,lift){var a=weekStart(i),b=weekStart(i+1),best=null;S.sessions.forEach(function(s){var d=parseYmd(s.date);if(d<a||d>=b)return;(s.exercises||[]).forEach(function(e){var ok=lift==='bench'?(e.name==='Bench press – top set'||(s.plan==='old'&&e.name==='Bench press')):(e.name==='Squat – top set'||(s.plan==='old'&&e.name==='Squat'));if(!ok)return;(e.sets||[]).forEach(function(x){if(x.w>0&&x.r>0&&(!best||x.w>best.w||(x.w===best.w&&x.r>best.r)))best={w:x.w,r:x.r};});});});return best;}
 function roadList(lift){var now=weekIndex(todayStr()),h='<ul class="road">';for(var i=0;i<=10;i++){var rw=roadWeek(i),t=lift==='bench'?rw.benchTop:rw.squatTop,res=weekResult(i,lift),cls='',txt='';
-  if(res){txt=res.w+' × '+res.r;cls=t.done?'hit':((res.w>=t.w&&res.r>=+firstInt(t.reps))?'hit':'miss');}if(i===now)cls+=' now';
-  h+='<li class="'+cls+'"><span class="wk">'+esc(weekStart(i).toLocaleDateString('en-CA',{month:'short',day:'numeric'}))+'</span><span class="tg">'+esc(t.done?'Done Tue':t.w+' × '+t.reps)+(rw.deload?' <span style="color:var(--tx3);font-weight:500">deload</span>':'')+'</span><span class="res">'+esc(txt||(i===now?'This week':''))+(cls.indexOf('hit')===0&&!t.done?' ✓':'')+(cls.indexOf('miss')===0?' · repeat':'')+'</span></li>';}
+  if(res){txt=res.w+' lbs × '+res.r;cls=t.done?'hit':((res.w>=t.w&&res.r>=+firstInt(t.reps))?'hit':'miss');}if(i===now)cls+=' now';
+  h+='<li class="'+cls+'"><span class="wk">'+esc(weekStart(i).toLocaleDateString('en-CA',{month:'short',day:'numeric'}))+'</span><span class="tg">'+esc(t.done?'Done Tue':t.w+' lbs × '+t.reps)+(rw.deload?' <span style="color:var(--tx3);font-weight:500">deload</span>':'')+'</span><span class="res">'+esc(txt||(i===now?'This week':''))+(cls.indexOf('hit')===0&&!t.done?' ✓':'')+(cls.indexOf('miss')===0?' · repeat':'')+'</span></li>';}
   return h+'</ul>';}
 function latestBw(){var e=S.bw.slice().sort(function(a,b){return a.date<b.date?-1:1});return e.length?e[e.length-1]:null}
 function nextBenchTarget(){var t=new Date();t.setHours(0,0,0,0);for(var i=Math.max(0,weekIndex(todayStr()));i<=10;i++){var mon=weekStart(i),rw=roadWeek(i);if(rw.benchTop.done||mon<t)continue;return {date:mon,w:rw.benchTop.w,reps:rw.benchTop.reps,easy:rw.benchTop.easy};}return null;}
 function milestones(est){var ms=[[135,'1 plate'],[225,'2 plates'],[235,'Your old best · 235 × 3',259],[275,'Halfway to 3'],[315,'3 plates']],nf=false,h='<ul class="miles">';
-  ms.forEach(function(m){var need=m[2]||m[0],ok=est>=need,nx=!ok&&!nf;if(nx)nf=true;h+='<li><b class="num">'+m[0]+'</b><span class="'+(ok||nx?'':'muted')+'">'+esc(m[1])+'</span><span class="'+(ok?'ok':nx?'nx':'muted')+' num">'+(ok?'Done':nx?Math.ceil(need-est)+' to go':'')+'</span></li>';});return h+'</ul>';}
+  ms.forEach(function(m){var need=m[2]||m[0],ok=est>=need,nx=!ok&&!nf;if(nx)nf=true;h+='<li><b class="num">'+m[0]+' lbs</b><span class="'+(ok||nx?'':'muted')+'">'+esc(m[1])+'</span><span class="'+(ok?'ok':nx?'nx':'muted')+' num">'+(ok?'Done':nx?Math.ceil(need-est)+' lbs to go':'')+'</span></li>';});return h+'</ul>';}
 function renderProgress(){
   renderWeeks(todayStr());var bench=liftSeries('bench'),squat=liftSeries('squat'),cur=bench.length?bench[bench.length-1]:null,est=cur?cur.v:0,nx=nextBenchTarget();
   var pct=Math.max(0,Math.min(100,(est-45)/(GOAL-45)*100));
   var h='<div class="enter"><div class="pagehead"><h1>Progress</h1><p class="about">Bench, one plate at a time.</p></div>';
-  h+='<section class="card" aria-labelledby="road-h"><h2 id="road-h" class="eyebrow">Bench · estimated max</h2><div class="big"><span class="w num"'+(cur?' data-count="'+cur.v+'"':'')+'>'+(cur?cur.v:'—')+'</span><span>'+(cur?'from '+cur.w+'\u00a0×\u00a0'+cur.r+' · '+(GOAL-cur.v)+' to 315':'log a bench top set to start')+'</span></div>';
+  h+='<section class="card" aria-labelledby="road-h"><h2 id="road-h" class="eyebrow">Bench · estimated max</h2><div class="big"><span class="w num"'+(cur?' data-count="'+cur.v+'"':'')+'>'+(cur?cur.v:'—')+'</span><span>'+(cur?'lbs · from '+cur.w+' lbs\u00a0×\u00a0'+cur.r+' · '+(GOAL-cur.v)+' lbs to go':'log a bench top set to start')+'</span></div>';
   h+='<div class="track" aria-hidden="true"><i style="width:'+pct+'%"></i>'+[135,225,315].map(function(m){return '<b class="'+(est>=m?'hit':'')+'" style="left:'+((m-45)/(GOAL-45)*100)+'%"><span>'+m+'</span></b>'}).join('')+'</div>';
-  h+=milestones(est);if(nx)h+='<p class="next"><b>'+nx.w+' × '+esc(nx.reps)+'</b>next top set · '+esc(nx.date.toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'}))+(nx.easy?' · deload':'')+'</p>';
+  h+=milestones(est);if(nx)h+='<p class="next"><b>'+nx.w+' lbs × '+esc(nx.reps)+'</b>next top set · '+esc(nx.date.toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'}))+(nx.easy?' · deload':'')+'</p>';
   h+='<p class="fine">Estimated max = weight × (1 + reps ÷ 30). 315 is about 2× your bodyweight, so it’s a long road. Getting back to 155+ lbs is part of it.</p></section>';
-  h+='<section class="card" aria-labelledby="bl-h"><h2 id="bl-h" class="eyebrow">Bench over time</h2>'+chart(bench,GOAL,'315','Bench estimated max over time')+'</section>';
+  h+='<section class="card" aria-labelledby="bl-h"><h2 id="bl-h" class="eyebrow">Bench over time</h2>'+chart(bench,GOAL,'315 lbs','Bench estimated max over time')+'</section>';
   h+='<section class="card" aria-labelledby="rb-h"><h2 id="rb-h">This block · back to 235</h2><p class="eyebrow" style="margin-top:4px">Hit the reps: next week’s weight. Missed: repeat the weight.</p>'+roadList('bench')+'</section>';
   var sc=squat.length?squat[squat.length-1]:null;
-  h+='<section class="card" aria-labelledby="sq-h"><h2 id="sq-h" class="eyebrow">Squat · estimated max</h2>'+(sc?'<div class="big"><span class="w num" data-count="'+sc.v+'">'+sc.v+'</span><span>from '+sc.w+'\u00a0×\u00a0'+sc.r+'</span></div>':'<p class="fine">Log a squat top set to see it.</p>')+chart(squat,GOAL,'315','Squat estimated max over time')+roadList('squat')+'</section>';
+  h+='<section class="card" aria-labelledby="sq-h"><h2 id="sq-h" class="eyebrow">Squat · estimated max</h2>'+(sc?'<div class="big"><span class="w num" data-count="'+sc.v+'">'+sc.v+'</span><span>lbs · from '+sc.w+' lbs\u00a0×\u00a0'+sc.r+'</span></div>':'<p class="fine">Log a squat top set to see it.</p>')+chart(squat,GOAL,'315 lbs','Squat estimated max over time')+roadList('squat')+'</section>';
   var lb=latestBw(),ent=S.bw.slice().sort(function(a,b){return a.date<b.date?-1:1});
   h+='<section class="card" aria-labelledby="bw-h"><h2 id="bw-h" class="eyebrow">Bodyweight</h2>';
-  if(lb){var toGo=Math.round((155-lb.lbs)*10)/10;h+='<div class="big"><span class="w num">'+lb.lbs+'</span><span>lbs · '+esc(fmt(lb.date))+' · '+(toGo>0?toGo+' to 155':'at 155+')+'</span></div>';}
-  h+=chart(ent.map(function(e){return {date:e.date,v:e.lbs}}),155,'155','Bodyweight over time');
+  if(lb){var toGo=Math.round((155-lb.lbs)*10)/10;h+='<div class="big"><span class="w num">'+lb.lbs+'</span><span>lbs · '+esc(fmt(lb.date))+' · '+(toGo>0?toGo+' lbs to go':'at 155+')+'</span></div>';}
+  h+=chart(ent.map(function(e){return {date:e.date,v:e.lbs}}),155,'155 lbs','Bodyweight over time');
   h+='<label class="flabel" for="bwIn">Today’s weight (lbs)</label><div class="inline" style="margin-top:0"><div class="step"><button type="button" data-act="bwdec" aria-label="Half a pound less">−</button><input type="text" inputmode="decimal" id="bwIn" placeholder="'+(lb?lb.lbs:140)+'"><button type="button" data-act="bwinc" aria-label="Half a pound more">+</button></div><button type="button" class="btn" data-act="bw">Save</button></div>';
   if(ent.length)h+='<ul class="rows">'+ent.slice(-6).reverse().map(function(e){return '<li><span>'+esc(fmt(e.date,{weekday:'short',month:'short',day:'numeric'}))+'</span><span>'+e.lbs+' lbs <button type="button" class="link link--danger" data-act="bwdel" data-date="'+esc(e.date)+'" aria-label="Remove weigh-in from '+esc(fmt(e.date))+'" style="margin-left:10px;font-size:13px">Remove</button></span></li>'}).join('')+'</ul>';
   h+='</section></div>';main.innerHTML=h;
@@ -759,7 +762,7 @@ main.addEventListener('click',function(ev){
     else if(act==='check'){var row2=b.closest('.set'),si=+row2.dataset.set,s2=e.sets[si],pr=false;
       if(!s2.done){var wi2=row2.querySelector('input[data-f="w"]'),ri2=row2.querySelector('input[data-f="r"]');if(s2.w===''&&wi2.placeholder!=='')s2.w=wi2.placeholder;if(s2.r===''&&ri2.placeholder!=='')s2.r=ri2.placeholder;if(!d.startedAt&&!d.saved)d.startedAt=Date.now();s2.done=true;startTimer(rex.rest);
         var wv=num(s2.w),rv=num(s2.r),prev=bestE1rm(rex.name,d.date);
-        if(wv>0&&rv>0&&prev>0&&e1rm(wv,rv)>prev+0.5&&!e.sets.some(function(x,k){return k!==si&&x.done&&x.pr})){s2.pr=true;pr=true;toast('New best on '+rex.label+': '+wv+'\u00a0×\u00a0'+rv);}
+        if(wv>0&&rv>0&&prev>0&&e1rm(wv,rv)>prev+0.5&&!e.sets.some(function(x,k){return k!==si&&x.done&&x.pr})){s2.pr=true;pr=true;toast('New best on '+rex.label+': '+wv+' lbs\u00a0×\u00a0'+rv);}
         saveDrafts();patchSet(i,si);if(pr&&!sec.querySelector('.pr')){var tag=document.createElement('span');tag.className='pr';tag.textContent='NEW BEST';tag.setAttribute('aria-hidden','true');sec.style.position='relative';sec.appendChild(tag);}
         if(e.sets.every(function(x){return x.done})){for(var k=i+1;k<list.length;k++){if(!exDraft(d,list[k]).sets.every(function(x){return x.done})){setTimeout(function(){openEx(k)},260);break;}}}
       }else{s2.done=false;s2.pr=false;saveDrafts();patchSet(i,si);}
