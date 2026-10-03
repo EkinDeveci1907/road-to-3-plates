@@ -30,8 +30,6 @@ a{color:var(--tx)}
 svg{display:block}
 :focus-visible{outline:2px solid var(--tx);outline-offset:2px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.skip{position:absolute;left:16px;top:calc(8px + env(safe-area-inset-top,0px));z-index:20;background:var(--tx);color:var(--bg);padding:8px 12px;border-radius:var(--rc);transform:translateY(-200%)}
-.skip:focus{transform:none}
 .scroller{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 .wrap{max-width:520px;margin:0 auto;padding:8px 16px 40px}
 body.timer-on .wrap{padding-bottom:110px}
@@ -304,7 +302,6 @@ body.has-finish .timer{bottom:calc(var(--tab) + var(--finish) + 10px + env(safe-
 </style>
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
 <div class="scroller" id="scroller"><div class="wrap">
   <header class="top"><p class="brand">Road to 3 Plates</p><div class="dots" id="weeks" aria-label="Week progress"></div></header>
   <main id="main" tabindex="-1"></main>
@@ -415,7 +412,7 @@ function fmtRest(s){var m=Math.floor(s/60),x=s%60;return m?(x?m+':'+pad(x):m+':0
 function lbs(n){return Math.round(n).toLocaleString('en-CA')}
 var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:'r235.drafts',sessions:'r235.sessions',bw:'r235.bw',checks:'r235.checks',seeded:'r235.seeded',hint:'r235.hideInstall'};
-var APP_VERSION='1.8 (Oct 3)';
+var APP_VERSION='1.9 (Oct 3)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
