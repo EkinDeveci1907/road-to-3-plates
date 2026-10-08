@@ -1,5 +1,5 @@
 // Road to 3 Plates, offline support. Change VERSION whenever index.html changes.
-const VERSION = 'r3p-v12';
+const VERSION = 'r3p-v13';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 const CACHE_HOSTS = ['raw.githubusercontent.com'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
