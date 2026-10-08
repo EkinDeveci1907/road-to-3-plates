@@ -347,10 +347,10 @@ var WORKOUTS=[
    {name:'Bench press – top set',label:'Bench press',sub:'Top set',media:'Bench press',kind:'benchTop',rest:180,bar:true},
    {name:'Bench press – back-off sets',label:'Bench press',sub:'Back-off sets',media:'Bench press',kind:'benchBack',rest:150,bar:true},
    {name:'Barbell row',sets:4,reps:'6–8',rest:150,hint:'Back feels off? Swap to a chest-supported row.'},
-   {name:'Overhead press',sets:3,reps:'6–8',rest:120},
+   {name:'DB shoulder press',label:'Dumbbell shoulder press',sets:3,reps:'8–10',rest:120,hint:'Log the weight of one dumbbell.'},
    {name:'Pull-ups',sets:3,reps:'6–10',rest:120,bw:true,hint:'Add weight once you get 3 × 10.'},
    {name:'Cable fly',sets:3,reps:'12–15',rest:75},
-   {name:'Cable lateral raise',sets:3,reps:'15–20',rest:60},
+   {name:'DB lateral raise',label:'Dumbbell lateral raise',sets:3,reps:'15–20',rest:60,hint:'Log the weight of one dumbbell.'},
    {name:'Barbell / EZ-bar curl',sets:3,reps:'8–10',rest:75}]},
  {key:'lowerA',day:'Wed',name:'Lower A',about:'Heavy squat day, plus abs',ex:[
    {name:'Squat – top set',label:'Squat',sub:'Top set',media:'Squat',kind:'squatTop',rest:180,bar:true},
@@ -362,12 +362,13 @@ var WORKOUTS=[
    {name:'Hanging leg raise',sets:3,reps:'10–15',rest:60,bw:true},
    {name:'Cable crunch',sets:3,reps:'12–15',rest:60},
    {name:'Back extension (hyperextension)',label:'Back extension',sets:3,reps:'12–15',rest:60,bw:true,backext:true}]},
- {key:'upperB',day:'Thu',name:'Upper B',about:'Lighter bench, more reps',ex:[
+ {key:'upperB',day:'Thu',name:'Upper B',about:'One heavy bench set, then volume',ex:[
+   {name:'Bench press – heavy set',label:'Bench press',sub:'Heavy set',media:'Bench press',kind:'benchHeavy',rest:180,bar:true,hint:'10 lbs under Monday’s top set. Stop with 1–2 reps left in the tank.'},
    {name:'Bench press – volume',label:'Bench press',sub:'Volume',media:'Bench press',kind:'benchVol',rest:120,bar:true},
    {name:'Incline DB press',sets:3,reps:'8–12',rest:120,hint:'Start with the 60 lb dumbbells and keep your form clean.'},
    {name:'Lat pulldown',sets:3,reps:'10–12',rest:105},
    {name:'Chest-supported / machine row',sets:3,reps:'10–12',rest:105},
-   {name:'Cable lateral raise',sets:4,reps:'12–20',rest:60},
+   {name:'DB lateral raise',label:'Dumbbell lateral raise',sets:4,reps:'12–20',rest:60,hint:'Log the weight of one dumbbell.'},
    {name:'Rear delt cable',sets:2,reps:'12–15',rest:60},
    {name:'Weighted dips',sets:3,reps:'8–12',rest:105,bw:true,hint:'Start at +30 lbs.'},
    {name:'Incline DB curl',sets:3,reps:'10–12',rest:60}]},
@@ -381,11 +382,11 @@ var WORKOUTS=[
    {name:'Tricep pushdown',sets:3,reps:'10–15',rest:60},
    {name:'Cable crunch',sets:3,reps:'12–15',rest:60}]}
 ];
-var ALIASES={'Bench press – top set':['Bench press'],'Bench press – back-off sets':['Bench press'],'Bench press – volume':['Bench press'],'Squat – top set':['Squat'],'Squat – back-off sets':['Squat'],
+var ALIASES={'Bench press – top set':['Bench press'],'Bench press – heavy set':['Bench press'],'DB shoulder press':['Shoulder press'],'Bench press – back-off sets':['Bench press'],'Bench press – volume':['Bench press'],'Squat – top set':['Squat'],'Squat – back-off sets':['Squat'],
  'Lat pulldown':['Lat pull down'],'Seated leg curl':['Leg curl'],'Leg curl':['Seated leg curl'],'Weighted dips':['Dips'],'Leg press':['Leg press / Bulgarian split squat'],
  'Barbell / EZ-bar curl':['Barbell curl'],'Chest-supported / machine row':['Machine row'],'Standing calf raise':['Calf raises'],'Chest fly machine':['Cable fly'],'Cable fly':['Chest fly machine'],'Back extension (hyperextension)':['Back extension']};
-var SWAPS={'Barbell row':['Chest-supported row','Seated cable row','One-arm DB row'],'Overhead press':['DB shoulder press','Machine shoulder press'],'Pull-ups':['Lat pulldown','Assisted pull-ups'],
- 'Cable fly':['Chest fly machine','DB fly'],'Cable lateral raise':['DB lateral raise'],'Barbell / EZ-bar curl':['DB curl','Cable curl'],'Romanian deadlift':['DB Romanian deadlift','Back extension'],
+var SWAPS={'Barbell row':['Chest-supported row','Seated cable row','One-arm DB row'],'Overhead press':['DB shoulder press','Machine shoulder press'],'DB shoulder press':['Machine shoulder press','Overhead press'],'Pull-ups':['Lat pulldown','Assisted pull-ups'],
+ 'Cable fly':['Chest fly machine','DB fly'],'Cable lateral raise':['DB lateral raise'],'DB lateral raise':['Cable lateral raise','Machine lateral raise'],'Barbell / EZ-bar curl':['DB curl','Cable curl'],'Romanian deadlift':['DB Romanian deadlift','Back extension'],
  'Leg press':['Hack squat','Goblet squat'],'Leg curl':['Seated leg curl','Lying leg curl'],'Standing calf raise':['Horizontal calf raise','Seated calf raise','Leg press calf raise'],'Hanging leg raise':['Captain’s chair knee raise'],
  'Cable crunch':['Ab machine crunch'],'Incline DB press':['Incline barbell press','Incline machine press'],'Lat pulldown':['Pull-ups'],'Chest-supported / machine row':['Seated cable row'],
  'Rear delt cable':['Reverse pec deck'],'Weighted dips':['Close-grip bench press','Machine dips'],'Incline DB curl':['Preacher curl'],'Bulgarian split squat (per leg)':['Walking lunge','Reverse lunge'],
@@ -418,15 +419,15 @@ function fmtRest(s){var m=Math.floor(s/60),x=s%60;return m?(x?m+':'+pad(x):m+':0
 function lbs(n){return Math.round(n).toLocaleString('en-CA')}
 var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:'r235.drafts',sessions:'r235.sessions',bw:'r235.bw',checks:'r235.checks',seeded:'r235.seeded',hint:'r235.hideInstall'};
-var APP_VERSION='2.1 (Oct 3)';
+var APP_VERSION='2.2 (Oct 8)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
 function roadWeek(wi){
   var i=Math.max(0,wi); if(i>10) return null;
   var bt=BENCH_TOP[i],st=SQUAT_TOP[i],o={i:i,deload:i===DELOAD_WEEK};
-  if(bt==='DL'){o.benchTop={w:185,reps:'3',sets:1,easy:true};o.benchBack={w:155,reps:'6',sets:1};o.benchVol={w:135,reps:'8',sets:2};}
-  else{var b=bt||[185,'5'];o.benchTop={w:b[0],reps:b[1],sets:1,done:!bt};o.benchBack={w:r5(b[0]*0.85),reps:i<6?'6–8':'5–6',sets:3};o.benchVol={w:r5(b[0]*0.72),reps:'8',sets:3};if(i===10)o.benchTop.extra='If 225 lbs flies up, try 235 lbs × 1–3 with a spotter.';}
+  if(bt==='DL'){o.benchTop={w:185,reps:'3',sets:1,easy:true};o.benchBack={w:155,reps:'6',sets:1};o.benchVol={w:135,reps:'8',sets:2};o.benchHeavy={w:165,reps:'3',sets:1,easy:true};}
+  else{var b=bt||[185,'5'];o.benchTop={w:b[0],reps:b[1],sets:1,done:!bt};o.benchBack={w:r5(b[0]*0.85),reps:i<6?'6–8':'5–6',sets:3};o.benchVol={w:r5(b[0]*0.72),reps:'8',sets:3};o.benchHeavy={w:b[0]-10,reps:'3',sets:1};if(i===10)o.benchTop.extra='If 225 lbs flies up, try 235 lbs × 1–3 with a spotter.';}
   if(st==='DL'){o.squatTop={w:185,reps:'3',sets:1,easy:true};o.squatBack={w:155,reps:'6',sets:1};}
   else{o.squatTop={w:st[0],reps:st[1],sets:1};o.squatBack={w:r5(st[0]*0.85),reps:i<6?'6–8':'5–6',sets:3};}
   return o;
@@ -442,7 +443,7 @@ function resolveEx(ex,wi,before){
   if(ex.kind){
     var t=rw?rw[ex.kind]:null;
     if(!t){var lift=/bench/.test(ex.kind)?'bench':'squat',top=autoTop(lift,before);
-      if(/Top/.test(ex.kind))t=top;else if(ex.kind==='benchVol')t={w:r5(top.w*0.72),reps:'8',sets:3};else t={w:r5(top.w*0.85),reps:'5–6',sets:3};
+      if(/Top/.test(ex.kind))t=top;else if(ex.kind==='benchVol')t={w:r5(top.w*0.72),reps:'8',sets:3};else if(ex.kind==='benchHeavy')t={w:top.w-10,reps:'3',sets:1};else t={w:r5(top.w*0.85),reps:'5–6',sets:3};
       if(top.auto&&/Top/.test(ex.kind))r.hint='Last best top set '+top.from.w+' lbs × '+top.from.r+'. Hit 3+ reps and it moves up 5 lbs.';}
     r.sets=t.sets;r.reps=t.reps;r.w=t.w;r.easy=!!t.easy;r.target=t.sets===1?t.w+' lbs × '+t.reps:t.sets+' × '+t.reps+' @ '+t.w+' lbs';if(t.extra)r.hint=t.extra;return r;
   }
@@ -646,7 +647,7 @@ function renderHistory(){
   renderWeeks(todayStr());var t0=todayStr(),all=sorted(),byDate={};all.forEach(function(s){(byDate[s.date]=byDate[s.date]||[]).push(s);});
   if(!S.calSel)S.calSel=t0;var sel=parseYmd(S.calSel);if(!S.calMonth)S.calMonth=new Date(sel.getFullYear(),sel.getMonth(),1);
   var y=S.calMonth.getFullYear(),mo=S.calMonth.getMonth(),first=new Date(y,mo,1),offset=(first.getDay()+6)%7,dim=new Date(y,mo+1,0).getDate(),cells=Math.ceil((offset+dim)/7)*7;
-  var h='<div class="enter"><div class="pagehead"><h1>Calendar</h1><p class="about">'+all.length+' workout'+(all.length===1?'':'s')+' logged \u00b7 gym days Mon, Wed, Thu, Fri</p></div>';
+  var h='<div class="enter"><div class="pagehead"><h1>Calendar</h1><p class="about">'+all.length+' workout'+(all.length===1?'':'s')+' logged \u00b7 gym days Mon, Wed, Thu, Fri</p>'+(all.length?'<button type="button" class="link" data-act="csv" style="margin-top:4px;min-height:40px">Export workout history (CSV)</button>':'')+'</div>';
   h+='<div class="calhead"><button type="button" data-act="moprev" aria-label="Previous month">\u2039</button><b aria-live="polite">'+esc(first.toLocaleDateString('en-CA',{month:'long',year:'numeric'}))+'</b><button type="button" data-act="monext" aria-label="Next month">\u203a</button></div>';
   h+='<div class="calgrid" role="group" aria-label="Days">'+['M','T','W','T','F','S','S'].map(function(x){return '<span class="dow" aria-hidden="true">'+x+'</span>'}).join('');
   for(var i=0;i<cells;i++){var d=new Date(y,mo,1-offset+i),ds=ymd(d),ses=byDate[ds]||[],key=SCHED[d.getDay()];
@@ -664,7 +665,7 @@ function renderHistory(){
   var lbk=LS.get('r235.lastBackup',null),stale=!lbk||(Date.now()-parseYmd(lbk).getTime())>14*DAY;
   h+='<section class="card" aria-labelledby="data-h"><h2 id="data-h">Your data</h2><p class="fine" style="margin-top:6px">Your workouts are saved on this phone. Deleting the app from your Home Screen erases them, so back up every week or two.</p>'+
     '<p class="fine">Last backup: <b style="color:'+(stale?'var(--red)':'var(--tx)')+'">'+(lbk?esc(fmt(lbk,{weekday:'short',month:'short',day:'numeric'})):'never')+'</b></p>'+
-    '<div class="actions-row"><button type="button" class="btn btn--ghost" data-act="backup">Back up now</button><button type="button" class="btn btn--ghost" data-act="restore">Restore</button><button type="button" class="btn btn--ghost" data-act="csv">Export CSV</button></div>'+
+    '<div class="actions-row"><button type="button" class="btn btn--ghost" data-act="csv">Export history (CSV)</button><button type="button" class="btn btn--ghost" data-act="backup">Back up now</button><button type="button" class="btn btn--ghost" data-act="restore">Restore</button></div>'+
     cloudCard()+'<p class="fine">App version '+APP_VERSION+'</p></section>';
   h+='</div>';main.innerHTML=h;
 }
@@ -780,7 +781,7 @@ main.addEventListener('click',function(ev){
   if(S.tab==='history'){if(act==='cloudon'){cloudConnect();return;}if(act==='cloudoff'){LS.set('r235.cloudUrl','');CLD.err='';keepScroll(renderHistory);toast('Sync turned off. Your workouts stay on this phone.');return;}if(act==='cloudsync'){syncCloud(true);return;}if(act==='moprev'||act==='monext'){S.calMonth=new Date(S.calMonth.getFullYear(),S.calMonth.getMonth()+(act==='moprev'?-1:1),1);keepScroll(renderHistory);return;}if(act==='day'){S.calSel=b.dataset.date;var pd=parseYmd(S.calSel);if(pd.getMonth()!==S.calMonth.getMonth())S.calMonth=new Date(pd.getFullYear(),pd.getMonth(),1);keepScroll(renderHistory);return;}if(act==='openday'){openWorkout(b.dataset.wk,b.dataset.date,b.dataset.start==='1');return;}if(act==='edit'){editSession(b.dataset.id);return;}if(act==='hist'){S.openHist[b.dataset.id]=!S.openHist[b.dataset.id];keepScroll(renderHistory);return;}
     if(act==='del'){var id=b.dataset.id,gone=S.sessions.filter(function(x){return x.id===id})[0];S.sessions=S.sessions.filter(function(x){return x.id!==id});tombAdd(id);persist();keepScroll(renderHistory);syncCloud();toast('Workout deleted','Undo',function(){tombDel(id);gone.savedAt=Math.max(gone.savedAt||0,1);S.sessions.push(gone);persist();keepScroll(renderHistory);syncCloud();});return;}
     if(act==='backup'){LS.set('r235.lastBackup',todayStr());setTimeout(function(){keepScroll(renderHistory)},400);}if(act==='backup')return shareFile('road-to-3-plates-backup-'+todayStr()+'.json',JSON.stringify({app:'road-to-235',version:3,sessions:S.sessions,bw:S.bw,checks:S.checks}),'application/json');
-    if(act==='csv')return shareFile('road-to-3-plates-logs.csv',toCsv(),'text/csv');
+    if(act==='csv'){if(!S.sessions.length){toast('No workouts to export yet.');return;}return shareFile('road-to-3-plates-workouts-'+todayStr()+'.csv',toCsv(),'text/csv');}
     if(act==='restore')return document.getElementById('restoreIn').click();}
 });
 finishBtn.addEventListener('click',function(){var w=workout(S.activeKey),d=draftFor(w.key);if(!d.saved&&!d.startedAt){d.startedAt=Date.now();saveDrafts();updateFinish();toast('Workout started. Tap ✓ after each set.');return;}doSave();});
@@ -788,8 +789,8 @@ document.getElementById('restoreIn').addEventListener('change',function(ev){var 
   rd.onload=function(){try{var o=JSON.parse(rd.result);if(!o||o.app!=='road-to-235'||!Array.isArray(o.sessions))throw 0;var byId={};S.sessions.forEach(function(s){byId[s.id]=s});o.sessions.forEach(function(s){if(s&&s.id&&s.date)byId[s.id]=s;});S.sessions=Object.keys(byId).map(function(k){return byId[k]});
       var bwBy={};S.bw.concat(o.bw||[]).forEach(function(e){if(e&&e.date)bwBy[e.date]=e;});S.bw=Object.keys(bwBy).map(function(k){return bwBy[k]});if(o.checks&&typeof o.checks==='object')Object.keys(o.checks).forEach(function(k){S.checks[k]=o.checks[k];});if(persist())toast('Backup restored');render();}
     catch(e){toast('That file isn’t a Road to 3 Plates backup.');}ev.target.value='';};rd.readAsText(f);});
-function toCsv(){var rows=[['date','workout','exercise','set','weight_lbs','reps','note']];sorted().reverse().forEach(function(s){(s.exercises||[]).forEach(function(e){if(!(e.sets||[]).length)rows.push([s.date,s.title,e.name,'','','',e.note||'']);(e.sets||[]).forEach(function(x,i){rows.push([s.date,s.title,e.name,i+1,x.w==null?'':x.w,x.r,i===0?(e.note||''):''])});});});
-  return rows.map(function(r){return r.map(function(c){c=String(c);return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(',')}).join('\n');}
+function toCsv(){var rows=[['date','day','week','workout','exercise','set','weight_lbs','reps','volume_lbs','est_max_lbs','workout_minutes','note']];sorted().reverse().forEach(function(s){var day=parseYmd(s.date).toLocaleDateString('en-CA',{weekday:'short'}),wi=weekIndex(s.date),wk=s.week||(wi>=0?wi+1:''),mins=s.mins||'';(s.exercises||[]).forEach(function(e){var bw=isBwName(e.name);if(!(e.sets||[]).length)rows.push([s.date,day,wk,s.title,e.name,'','','','','',mins,e.note||'']);(e.sets||[]).forEach(function(x,i){var ok=!bw&&x.w>0&&x.r>0;rows.push([s.date,day,wk,s.title,e.name,i+1,x.w==null?'':x.w,x.r==null?'':x.r,ok?Math.round(x.w*x.r):'',ok?Math.round(e1rm(x.w,x.r)):'',mins,i===0?(e.note||''):''])});});});
+  return '\ufeff'+rows.map(function(r){return r.map(function(c){c=String(c);if(/^[=+\-@]/.test(c)&&!/^-?\d/.test(c))c="'"+c;return /[",\r\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(',')}).join('\r\n');}
 function shareFile(name,text,type){try{var file=new File([text],name,{type:type});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:name}).catch(function(){});return;}}catch(e){}
   try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);}catch(e){toast('Couldn’t create the file on this device.');}}
 function doSave(){
