@@ -1,5 +1,5 @@
 // Road to 3 Plates, offline support. Change VERSION whenever index.html changes.
-const VERSION = 'r3p-v18';
+const VERSION = 'r3p-v19';
 const OWN = 'r3p-'; // only ever clean up this app's own caches: the other builds share this origin
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 const CACHE_HOSTS = ['raw.githubusercontent.com'];
