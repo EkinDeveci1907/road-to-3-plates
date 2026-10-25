@@ -288,7 +288,7 @@ body.has-finish .timer{bottom:calc(var(--tab) + var(--finish) + 10px + env(safe-
 .hist__body p{margin:8px 0;font-size:14px;color:var(--tx2)}
 .hist__body strong{color:var(--tx);font-weight:600}
 .actions-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;align-items:end}
 body.setup .tabs,body.setup .gear{display:none}
 .calhead{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;margin-top:16px;background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:4px}
 .calhead button{height:44px;border-radius:10px;font-size:26px;line-height:1;color:var(--tx)}
@@ -493,7 +493,7 @@ function fmtRest(s){var m=Math.floor(s/60),x=s%60;return m?(x?m+':'+pad(x):m+':0
 function lbs(n){return Math.round(n).toLocaleString('en-CA')}
 var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:P+'.drafts',sessions:P+'.sessions',bw:P+'.bw',checks:P+'.checks',seeded:P+'.seeded',hint:P+'.hideInstall'};
-var APP_VERSION='4.4 (Oct 23)';
+var APP_VERSION='4.5 (Oct 25)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
@@ -527,7 +527,6 @@ function topTarget(lift,wi,before){
   if(plan&&plan.easy)return plan;
   if(!last)return plan||{w:lift==='bench'?B0:S0,reps:'5',sets:1};
   var w=(lift==='bench'||last.hit)?last.w+5:last.w,t={w:w,reps:plan?plan.reps:'3–5',sets:1,auto:true,from:last};
-  if(plan&&plan.w!==w)t.plan=plan.w;
   if(plan&&plan.extra)t.extra=plan.extra;
   return t;
 }
@@ -536,7 +535,7 @@ function resolveEx(ex,wi,before){
   if(ex.kind){
     var lift=/bench/.test(ex.kind)?'bench':'squat',top=topTarget(lift,wi,before),t;
     if(/Top/.test(ex.kind)){t=top;
-      if(top.auto)r.hint='Last top set '+top.from.w+' lbs × '+top.from.r+' ('+fmt(top.from.date)+'). '+(lift==='bench'?'Bench goes up 5 lbs every week.':top.from.hit?'You hit the reps, so it’s up 5 lbs.':'Missed the reps, so same weight again.')+(top.from.skip?' Your '+fmt(top.from.skip)+' set (2 reps or fewer) doesn’t count.':'')+(top.plan?' The plan line says '+top.plan+'.':'')+(lift==='bench'?'':' Hit '+firstInt(top.reps)+'+ reps and it moves up 5 lbs next week.');}
+      if(top.auto)r.hint='Last top set '+top.from.w+' lbs × '+top.from.r+' ('+fmt(top.from.date)+'). '+(lift==='bench'?'Bench goes up 5 lbs every week.':top.from.hit?'You hit the reps, so it’s up 5 lbs.':'Missed the reps, so same weight again.')+(top.from.skip?' Your '+fmt(top.from.skip)+' set (2 reps or fewer) doesn’t count.':'')+(lift==='bench'?'':' Hit '+firstInt(top.reps)+'+ reps and it moves up 5 lbs next week.');}
     else if(rw&&rw.deload)t=rw[ex.kind];
     else if(ex.kind==='benchVol'){t=volTarget(top,before);if(t.why)r.hint=(r.hint?r.hint+' ':'')+t.why;}
     else if(ex.kind==='benchHeavy'){var mon=top.from&&weekIndex(top.from.date)===wi?top.from.w:top.w;t={w:mon-10,reps:'3',sets:1};}
@@ -597,9 +596,23 @@ var S={tab:'today',sessions:LS.get(K.sessions,[]),bw:LS.get(K.bw,[]),checks:LS.g
 function defaultKey(){return ({1:'upperA',2:'lowerA',3:'lowerA',4:'upperB',5:'lowerB',6:'upperA',0:'upperA'})[new Date().getDay()]}
 S.activeKey=defaultKey();
 function workout(k){for(var i=0;i<WORKOUTS.length;i++)if(WORKOUTS[i].key===k)return WORKOUTS[i];return WORKOUTS[0]}
+/* Has anything been typed or checked in this draft? */
+function draftHasWork(d){
+  if(!d)return false;
+  return Object.keys(d.ex||{}).some(function(n){
+    var e=d.ex[n];
+    return e.note||(e.sets||[]).some(function(s){return s.r!==''||s.w!==''||s.done});
+  });
+}
+/* Would switching away from this draft throw away numbers that aren't saved yet? */
+function hasUnsaved(w,d){
+  if(!d)return false;
+  if(d.saved)return hasChanges(w,d);
+  return draftHasWork(d);
+}
 function draftFor(key){
   var d=S.drafts[key],t=todayStr();
-  var has=d&&Object.keys(d.ex||{}).some(function(n){return d.ex[n].note||(d.ex[n].sets||[]).some(function(s){return s.r!==''||s.w!==''||s.done})});
+  var has=draftHasWork(d);
   var old=(d&&(d.created||d.date))!==t;
   if(!d||(old&&(!has||d.saved))){d={date:t,created:t,ex:{},swap:{},extra:[]};S.drafts[key]=d;}
   d.swap=d.swap||{};d.extra=d.extra||[];return d;
@@ -751,10 +764,27 @@ function chart(pts,goal,goalLabel,title){
   return '<div class="chart">'+s+'</div>';
 }
 function weekResult(i,lift){var a=weekStart(i),b=weekStart(i+1),best=null;S.sessions.forEach(function(s){var d=parseYmd(s.date);if(d<a||d>=b)return;(s.exercises||[]).forEach(function(e){var ok=lift==='bench'?(e.name==='Bench press – top set'||(s.plan==='old'&&e.name==='Bench press')):(e.name==='Squat – top set'||(s.plan==='old'&&e.name==='Squat'));if(!ok)return;(e.sets||[]).forEach(function(x){if(x.w>0&&x.r>0&&(!best||x.w>best.w||(x.w===best.w&&x.r>best.r)))best={w:x.w,r:x.r};});});});return best;}
-function roadList(lift){var now=weekIndex(todayStr()),h='<ul class="road">';for(var i=0;i<=10;i++){var rw=roadWeek(i),t=lift==='bench'?rw.benchTop:rw.squatTop,res=weekResult(i,lift),cls='',txt='';
-  if(res){txt=res.w+' lbs × '+res.r;cls=t.done?'hit':((res.w>=t.w&&res.r>=+firstInt(t.reps))?'hit':'miss');}if(i===now)cls+=' now';
-  h+='<li class="'+cls+'"><span class="wk">'+esc(weekStart(i).toLocaleDateString('en-CA',{month:'short',day:'numeric'}))+'</span><span class="tg">'+esc(t.done?'Done Tue':t.w+' lbs × '+t.reps)+(rw.deload?' <span style="color:var(--tx3);font-weight:500">deload</span>':'')+'</span><span class="res">'+esc(txt||(i===now?'This week':''))+(cls.indexOf('hit')===0&&!t.done?' ✓':'')+(cls.indexOf('miss')===0?' · repeat':'')+'</span></li>';}
-  return h+'</ul>';}
+/* The block week by week. Up to next week it shows the target the app actually gave you (same as the Today tab).
+   After that it's a guess: 5 lbs more each week. */
+function roadList(lift){
+  var now=weekIndex(todayStr()),kind=lift==='bench'?'benchTop':'squatTop',h='<ul class="road">',ahead=null;
+  for(var i=0;i<=10;i++){
+    var rw=roadWeek(i),plan=rw[kind],res=weekResult(i,lift),t,cls='',txt='',mark='';
+    if(plan.done||plan.easy)t=plan;
+    else if(i<=now+1||!ahead){t=topTarget(lift,i,ymd(weekStart(i)));ahead=t;}
+    else{ahead={w:ahead.w+5,reps:plan.reps};t=ahead;}
+    if(res){
+      txt=res.w+' lbs × '+res.r;
+      var hit=t.done||(res.w>=t.w&&res.r>=+firstInt(t.reps));
+      if(hit){cls='hit';if(!t.done)mark=' ✓';}
+      else if(res.r<=2){cls='miss';mark=' · doesn’t count';}
+      else if(lift==='squat'){cls='miss';mark=' · repeat';}
+    }
+    if(i===now)cls+=' now';
+    h+='<li class="'+cls+'"><span class="wk">'+esc(weekStart(i).toLocaleDateString('en-CA',{month:'short',day:'numeric'}))+'</span><span class="tg">'+esc(t.done?'Done Tue':t.w+' lbs × '+t.reps)+(rw.deload?' <span style="color:var(--tx3);font-weight:500">deload</span>':'')+'</span><span class="res">'+esc((txt||(i===now?'This week':''))+mark)+'</span></li>';
+  }
+  return h+'</ul>';
+}
 function latestBw(){var e=S.bw.slice().sort(function(a,b){return a.date<b.date?-1:1});return e.length?e[e.length-1]:null}
 function nextBenchTarget(){var t=new Date();t.setHours(0,0,0,0);for(var i=Math.max(0,weekIndex(todayStr()));i<=10;i++){var mon=weekStart(i),rw=roadWeek(i);if(rw.benchTop.done||mon<t)continue;var tt=topTarget('bench',i,ymd(mon));return {date:mon,w:tt.w,reps:tt.reps,easy:tt.easy};}return null;}
 function liftCards(lift){
@@ -765,7 +795,7 @@ function liftCards(lift){
     var nx=nextBenchTarget();if(nx)h+='<p class="next"><b>'+nx.w+' lbs × '+esc(nx.reps)+'</b>next top set · '+esc(nx.date.toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'}))+(nx.easy?' · deload':'')+'</p>';}
   h+=chart(ser,GOAL,'315 lbs',(lift==='bench'?'Bench':'Squat')+' estimated max over time');
   h+='<p class="fine">Estimated max = weight × (1 + reps ÷ 30).'+(lift==='bench'?' 3 plates is a long road. Eating enough to get to '+BWG+'+ lbs is a big part of it.':'')+'</p></section>';
-  h+='<section class="card" aria-labelledby="rb-h"><h2 id="rb-h">'+(lift==='bench'?'This block · '+(CFG.seed?'back to 235':'top sets'):'This block')+'</h2><p class="eyebrow" style="margin-top:4px">Hit the reps: next week’s weight. Missed: repeat the weight.</p>'+roadList(lift)+'</section>';
+  h+='<section class="card" aria-labelledby="rb-h"><h2 id="rb-h">'+(lift==='bench'?'This block · '+(CFG.seed?'back to 235':'top sets'):'This block')+'</h2><p class="eyebrow" style="margin-top:4px">'+(lift==='bench'?'Up 5 lbs every week from your last top set. 2 reps or fewer doesn’t count.':'Hit the reps: up 5 lbs. Missed: same weight again.')+'</p>'+roadList(lift)+'</section>';
   return h;
 }
 function weightCard(){
@@ -824,9 +854,9 @@ function ftIn(inches){var f=Math.floor(inches/12),i=Math.round(inches-f*12);if(i
 function numField(id,label,ph,val,extra){return '<label class="flabel" for="'+id+'">'+label+'</label><input class="field" id="'+id+'" inputmode="decimal" placeholder="'+esc(ph)+'" value="'+(val==null?'':esc(val))+'"'+(extra||'')+'>';}
 function profileFields(full){var h='';
   if(full)h+=numField('pf-w','Your bodyweight now (lbs)','e.g. 150','');
-  h+='<div class="two">'+numField('pf-ft','Height (feet)','5',Math.floor(HT/12))+numField('pf-in','Height (inches)','8',Math.round(HT%12))+'</div>';
+  h+='<div class="two"><div>'+numField('pf-ft','Height (feet)','5',Math.floor(HT/12))+'</div><div>'+numField('pf-in','Height (inches)','8',Math.round(HT%12))+'</div></div>';
   if(full)h+=numField('pf-age','Age','22',AGE);
-  h+='<div class="two">'+numField('pf-b','Bench: heaviest 5 reps (lbs)','e.g. 185',B0)+numField('pf-s','Squat: heaviest 5 reps (lbs)','e.g. 185',S0)+'</div>';
+  h+='<div class="two"><div>'+numField('pf-b','Bench: heaviest 5 reps (lbs)','e.g. 185',B0)+'</div><div>'+numField('pf-s','Squat: heaviest 5 reps (lbs)','e.g. 185',S0)+'</div></div>';
   h+=numField('pf-g','Goal bodyweight (lbs)','155',BWG);
   return h;}
 function readProfile(full){function v(id){var el=document.getElementById(id);if(!el)return null;var n=parseFloat((el.value||'').replace(',','.'));return isFinite(n)?n:null;}
@@ -878,14 +908,24 @@ function dayDetail(ds,ses){
   return h+'</section>';
 }
 function openWorkout(key,date,start){
-  S.activeKey=key;var d=draftFor(key);
-  if(date&&d.date!==date){var busy=!d.saved&&Object.keys(d.ex).some(function(n){return (d.ex[n].sets||[]).some(function(x){return x.done})});if(!busy){d={date:date,created:todayStr(),ex:{},swap:{},extra:[]};S.drafts[key]=d;}}
+  S.activeKey=key;var d=draftFor(key),w=workout(key);
+  if(date&&d.date!==date){
+    if(hasUnsaved(w,d)){
+      S.openEx={};S.tab='today';render();SC.scrollTop=0;
+      toast('You have an unsaved '+w.name+' from '+fmt(d.date)+'. Save it first, then log this one.','',null,4000);
+      return;
+    }
+    d={date:date,created:todayStr(),ex:{},swap:{},extra:[]};S.drafts[key]=d;
+  }
   if(start&&!d.startedAt&&!d.saved)d.startedAt=Date.now();
   saveDrafts();S.openEx={};S.tab='today';render();SC.scrollTop=0;if(start)toast('Workout started. Tap \u2713 after each set.');
 }
 function editSession(id){
   var s=S.sessions.filter(function(x){return x.id===id})[0];if(!s||!WORKOUTS.some(function(x){return x.key===s.key}))return;
-  var w=workout(s.key),d={date:s.date,created:todayStr(),ex:{},swap:{},extra:[],saved:true},list=exList(w,d),used={};
+  var w=workout(s.key),cur=S.drafts[w.key];
+  // Don't wipe a workout that's being logged right now
+  if(cur&&cur.date!==s.date&&hasUnsaved(w,cur)){toast('You have an unsaved '+w.name+' from '+fmt(cur.date)+'. Save it first, then edit this one.','',null,4000);return;}
+  var d={date:s.date,created:todayStr(),ex:{},swap:{},extra:[],saved:true},list=exList(w,d),used={};
   (s.exercises||[]).forEach(function(e){var r=null;for(var i=0;i<list.length;i++){if(!used[i]&&list[i].name===e.name){r=list[i];used[i]=1;break;}}
     var sets=(e.sets||[]).map(function(x){return {w:x.w==null?'':String(x.w),r:x.r==null?'':String(x.r),done:true};});
     if(r)d.ex[r.key]={sets:sets.length?sets:[{w:'',r:'',done:false}],note:e.note||''};
@@ -955,7 +995,11 @@ main.addEventListener('click',function(ev){
   if(b.dataset.key){if(b.dataset.key===S.activeKey)return;S.activeKey=b.dataset.key;S.swapOpen=null;S.addOpen=false;slideSeg(b,renderToday);return;}
   if(b.dataset.pv){if(b.dataset.pv===S.progView)return;S.progView=b.dataset.pv;slideSeg(b,renderProgress);return;}
   if(act==='cloudshow'){S.cloudOpen=true;keepScroll(render);refocus('#cloudIn');return;}if(act==='cloudon'){cloudConnect();return;}if(act==='cloudoff'){LS.set(P+'.cloudUrl','');CLD.err='';keepScroll(render);toast('Sync turned off. Your workouts stay on this phone.');return;}if(act==='cloudsync'){syncCloud(true);return;}
-  if(act==='backup'){LS.set(P+'.lastBackup',todayStr());setTimeout(function(){keepScroll(render)},400);}if(act==='backup')return shareFile('shayan-backup-'+todayStr()+'.json',JSON.stringify({app:'road-to-235',version:3,sessions:S.sessions,bw:S.bw,checks:S.checks,profile:PROF}),'application/json');
+  if(act==='backup'){
+    // "Last backup" only changes once the file was actually saved or shared, not if the share sheet is cancelled
+    var backupDone=function(){LS.set(P+'.lastBackup',todayStr());if(S.view==='settings')keepScroll(render);toast('Backup saved');};
+    return shareFile('shayan-backup-'+todayStr()+'.json',JSON.stringify({app:'road-to-235',version:3,sessions:S.sessions,bw:S.bw,checks:S.checks,profile:PROF}),'application/json',backupDone);
+  }
   if(act==='csv'){if(!S.sessions.length){toast('No workouts to export yet.');return;}return shareFile('shayan-workouts-'+todayStr()+'.csv',toCsv(),'text/csv');}
   if(act==='restore')return document.getElementById('restoreIn').click();
   if(act==='hidehint'){LS.set(K.hint,true);keepScroll(renderToday);return;}
@@ -995,13 +1039,17 @@ main.addEventListener('click',function(ev){
 });
 finishBtn.addEventListener('click',function(){var w=workout(S.activeKey),d=draftFor(w.key);if(!d.saved&&!d.startedAt){d.startedAt=Date.now();saveDrafts();updateFinish();toast('Workout started. Tap ✓ after each set.');return;}openSummary();});
 document.getElementById('restoreIn').addEventListener('change',function(ev){var f=ev.target.files&&ev.target.files[0];if(!f)return;var rd=new FileReader();
-  rd.onload=function(){try{var o=JSON.parse(rd.result);if(!o||o.app!=='road-to-235'||!Array.isArray(o.sessions))throw 0;var byId={};S.sessions.forEach(function(s){byId[s.id]=s});o.sessions.forEach(function(s){if(s&&s.id&&s.date)byId[s.id]=s;});S.sessions=Object.keys(byId).map(function(k){return byId[k]});
-      var bwBy={};S.bw.concat(o.bw||[]).forEach(function(e){if(e&&e.date)bwBy[e.date]=e;});S.bw=Object.keys(bwBy).map(function(k){return bwBy[k]});if(o.checks&&typeof o.checks==='object')Object.keys(o.checks).forEach(function(k){S.checks[k]=o.checks[k];});var np=!PROF&&o.profile&&o.profile.bench&&o.profile.squat;if(np)LS.set(P+'.profile',o.profile);if(persist())toast('Backup restored');if(np){setTimeout(function(){location.reload()},700);return;}render();}
+  rd.onload=function(){try{var o=JSON.parse(rd.result);if(!o||o.app!=='road-to-235'||!Array.isArray(o.sessions))throw 0;var byId={},added=0;S.sessions.forEach(function(s){byId[s.id]=s});
+      // Only take a workout from the backup if this phone doesn't have it, or the backup's copy was saved later
+      o.sessions.forEach(function(s){if(!s||!s.id||!s.date)return;var mine=byId[s.id];if(!mine||(s.savedAt||0)>(mine.savedAt||0)){byId[s.id]=s;added++;}});
+      S.sessions=Object.keys(byId).map(function(k){return byId[k]});
+      var bwBy={};S.bw.concat(o.bw||[]).forEach(function(e){if(e&&e.date)bwBy[e.date]=e;});S.bw=Object.keys(bwBy).map(function(k){return bwBy[k]});if(o.checks&&typeof o.checks==='object')Object.keys(o.checks).forEach(function(k){S.checks[k]=o.checks[k];});var np=!PROF&&o.profile&&o.profile.bench&&o.profile.squat;if(np)LS.set(P+'.profile',o.profile);if(persist())toast(added?'Backup restored: '+added+' workout'+(added===1?'':'s')+' added':'Backup restored. This phone already had everything in it.');if(np){setTimeout(function(){location.reload()},700);return;}render();}
     catch(e){toast('That file isn’t a Road to 3 Plates backup.');}ev.target.value='';};rd.readAsText(f);});
 function toCsv(){var rows=[['date','day','week','workout','exercise','set','weight_lbs','reps','volume_lbs','est_max_lbs','workout_minutes','note']];sorted().reverse().forEach(function(s){var day=parseYmd(s.date).toLocaleDateString('en-CA',{weekday:'short'}),wi=weekIndex(s.date),wk=s.week||(wi>=0?wi+1:''),mins=s.mins||'';(s.exercises||[]).forEach(function(e){var bw=isBwName(e.name);if(!(e.sets||[]).length)rows.push([s.date,day,wk,s.title,e.name,'','','','','',mins,e.note||'']);(e.sets||[]).forEach(function(x,i){var ok=!bw&&x.w>0&&x.r>0;rows.push([s.date,day,wk,s.title,e.name,i+1,x.w==null?'':x.w,x.r==null?'':x.r,ok?Math.round(x.w*x.r):'',ok?Math.round(e1rm(x.w,x.r)):'',mins,i===0?(e.note||''):''])});});});
   return '\ufeff'+rows.map(function(r){return r.map(function(c){c=String(c);if(/^[=+\-@]/.test(c)&&!/^-?\d/.test(c))c="'"+c;return /[",\r\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(',')}).join('\r\n');}
-function shareFile(name,text,type){try{var file=new File([text],name,{type:type});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:name}).catch(function(){});return;}}catch(e){}
-  try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);}catch(e){toast('Couldn’t create the file on this device.');}}
+function shareFile(name,text,type,done){done=done||function(){};
+  try{var file=new File([text],name,{type:type});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:name}).then(done).catch(function(){});return;}}catch(e){}
+  try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;document.body.appendChild(a);a.click();done();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);}catch(e){toast('Couldn’t create the file on this device.');}}
 /* What would be saved right now from this draft (doSave and the summary both use this) */
 function draftSession(w,d){
   var list=exList(w,d),exs=[],any=false,prs=0,skipped=[];
@@ -1023,14 +1071,17 @@ function openSummary(){
   if(!ds.any){toast('Log at least one set first. Tap the check next to a set.');return;}
   var id=d.date+'-'+w.key,prior=S.sessions.filter(function(x){return x.id===id})[0]||null,edit=!!(d.saved&&prior),st=sessionStats({exercises:ds.exs});
   var mins=edit?prior.mins:(d.startedAt?Math.max(1,Math.round((Date.now()-d.startedAt)/60000)):0);if(mins>240)mins=0;
+  var prs=ds.prs||(edit&&prior.prs)||0;
   var old={};if(edit)(prior.exercises||[]).forEach(function(e){old[e.name]=exSig(e);});
-  var h='<div class="receipt"><h2 id="sheet-h">'+(edit?'Save changes?':'Finish '+esc(w.name)+'?')+'</h2><p class="eyebrow">'+esc(fmt(d.date,{weekday:'long',month:'short',day:'numeric'}))+(edit?' · check your changes, then save':' · check it over, then save')+'</p>'+
-    '<dl><dt>Time</dt><dd class="num">'+(mins?mins+' min':'–')+'</dd><dt>Sets</dt><dd class="num">'+st.sets+'</dd><dt>Weight moved</dt><dd class="num">'+lbs(st.vol)+' lbs</dd><dt>New bests</dt><dd class="num">'+ds.prs+'</dd></dl>';
+  var h='<div class="receipt"><h2 id="sheet-h">'+(edit?'Save changes?':'Finish '+esc(w.name)+'?')+'</h2><p class="eyebrow">'+esc(fmt(d.date,{weekday:'long',month:'short',day:'numeric'}))+(edit?' · check your changes, then save':' · check it over, then save')+'</p>';
+  // Same workout already saved on this date: saving now would replace it
+  if(prior&&!edit){var pst=sessionStats(prior);h+='<p class="fine" style="color:var(--red);margin-top:10px">You already saved '+esc(w.name)+' on this date ('+pst.sets+' sets). Saving replaces it. Change the date at the bottom of the page if this is a different day.</p>';}
+  h+='<dl><dt>Time</dt><dd class="num">'+(mins?mins+' min':'–')+'</dd><dt>Sets</dt><dd class="num">'+st.sets+'</dd><dt>Weight moved</dt><dd class="num">'+lbs(st.vol)+' lbs</dd><dt>New bests</dt><dd class="num">'+prs+'</dd></dl>';
   h+='<ul class="sum">';ds.exs.forEach(function(e){var t=setsText(e.sets,isBwName(e.name)),ch=edit&&old[e.name]!==exSig(e);
     h+='<li><b>'+esc(e.name)+(ch?'<span class="tag">changed</span>':'')+'</b><span class="num">'+(t?esc(t):'not logged')+'</span>'+(e.note?'<span>“'+esc(e.note)+'”</span>':'')+'</li>';});h+='</ul>';
   if(edit){var gone=(prior.exercises||[]).filter(function(e){return !ds.exs.some(function(x){return x.name===e.name})}).map(function(e){return e.name});if(gone.length)h+='<p class="fine">Removed: '+esc(gone.join(', '))+'.</p>';}
   else if(ds.skipped.length)h+='<p class="fine">Not logged: '+esc(ds.skipped.join(', '))+'.</p>';
-  h+='<div class="sum-btns"><button type="button" class="btn" data-act="confirmsave">'+(edit?'Save changes':'Save workout')+'</button><button type="button" class="btn btn--ghost" data-close>'+(edit?'Keep editing':'Keep going')+'</button></div></div>';
+  h+='<div class="sum-btns"><button type="button" class="btn" data-act="confirmsave">'+(edit?'Save changes':prior?'Replace it':'Save workout')+'</button><button type="button" class="btn btn--ghost" data-close>'+(edit?'Keep editing':'Keep going')+'</button></div></div>';
   sheetIn.innerHTML=h;sheetEl.scrollTop=0;sheetEl.classList.add('show');sheetBg.classList.add('show');sheetEl.setAttribute('aria-hidden','false');
 }
 function doSave(){
@@ -1038,6 +1089,7 @@ function doSave(){
   if(!ds.any){toast('Log at least one set first. Tap the check next to a set.');return;}
   var id=d.date+'-'+w.key,prior=S.sessions.filter(function(x){return x.id===id})[0]||null;
   var mins=(prior&&prior.mins)||(d.startedAt?Math.max(1,Math.round((Date.now()-d.startedAt)/60000)):0);if(mins>240)mins=0;
+  if(!prs&&prior&&d.saved)prs=prior.prs||0;   // editing a saved workout keeps its new-best count
   var sess={id:id,date:d.date,key:w.key,title:w.name,plan:'new',week:weekIndex(d.date)+1,exercises:exs,prs:prs,mins:mins||null,savedAt:Date.now()};
   S.sessions=S.sessions.filter(function(x){return x.id!==id}).concat([sess]);if(!persist())return;
   S.undo={id:id,prior:prior,wasSaved:!!d.saved};d.saved=true;d.snap=sessSig(d.date,exs);saveDrafts();stopTimer();syncCloud();SC.scrollTop=0;renderToday();toast(prior?'Changes saved':w.name+' saved');
