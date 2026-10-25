@@ -12,7 +12,7 @@ Logs are saved on the phone. Settings (gear) → Back up now keeps a copy; `back
 
 ## How targets work
 - Every exercise: the heaviest weight from the last time you did it (any day) + 5 lbs, once a week. Already did it earlier this week → same weight. Sets of 2 reps or fewer and deload week don't count.
-- Bench/squat top set, back-off sets and Thursday wide-grip volume each follow their own last weight. Thursday's heavy set is 10 under Monday's top set. The 11-week table in `BENCH_TOP` is only the starting line; Settings → Your numbers resets it from a new 5-rep max.
+- Bench: Monday's top set and Thursday's heavy set are one chain, each 5 lbs more than the last heavy bench (210 Thu → 215 Mon → 220 Thu). Squat top set, back-off sets and Thursday wide-grip volume each follow their own last weight, +5 a week. The 11-week table in `BENCH_TOP` is only the starting line; Settings → Your numbers resets it from a new 5-rep max.
 - Bodyweight-only (pull-ups): add 5 lbs once every set reaches the top of the rep range.
 - "Last time" shows the most recent time you did that exercise, any day. Bench rows show every bench set from that day.
 
