@@ -500,7 +500,7 @@ function fmtRest(s){var m=Math.floor(s/60),x=s%60;return m?(x?m+':'+pad(x):m+':0
 function lbs(n){return Math.round(n).toLocaleString('en-CA')}
 var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:P+'.drafts',sessions:P+'.sessions',bw:P+'.bw',checks:P+'.checks',seeded:P+'.seeded',hint:P+'.hideInstall'};
-var APP_VERSION='4.5 (Oct 25)';
+var APP_VERSION='4.6 (Oct 25)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
@@ -513,80 +513,115 @@ function roadWeek(wi){
   else{o.squatTop={w:st[0],reps:st[1],sets:1};o.squatBack={w:r5(st[0]*0.85),reps:i<6?'6–8':'5–6',sets:3};}
   return o;
 }
-/* The last top set you actually logged for a lift (deload weeks don't count), with the rep target it had that day.
-   Sets of 2 reps or fewer don't count: an off day or a 1-rep test shouldn't move your numbers. */
+/* ================= suggested weights =================
+   Every exercise: the heaviest weight you did the last time you did it (any day) + 5 lbs, once a week.
+   Already did it earlier this week? Same weight again, so twice-a-week exercises don't jump 10.
+   Deload week doesn't count, and neither do sets of 2 reps or fewer (an off day or a max test). */
+var LIFTS={
+  bench:['Bench press – top set','Bench press – back-off sets','Bench press – heavy set','Bench press – volume','Bench press'],
+  squat:['Squat – top set','Squat – back-off sets','Squat']
+};
 function maxReps(sets){var m=0;(sets||[]).forEach(function(x){if(+x.r>m)m=+x.r});return m;}
-function lastTop(lift,before){
-  var names=lift==='bench'?['Bench press – top set','Bench press']:['Squat – top set','Squat'],kind=lift==='bench'?'benchTop':'squatTop',best=null,skip=null;
-  var since=PROF&&PROF.setAt?PROF.setAt:'';
-  sorted().some(function(s){if(s.date>=before||s.date<since)return false;var wi=weekIndex(s.date);if(wi===DELOAD_WEEK&&s.plan!=='old')return false;
-    (s.exercises||[]).forEach(function(e){if(names.indexOf(e.name)<0)return;(e.sets||[]).forEach(function(x){if(x.w>0&&x.r>2&&(!best||x.w>best.w||(x.w===best.w&&x.r>best.r)))best={w:x.w,r:x.r,date:s.date};});});
-    if(!best&&!skip&&(s.exercises||[]).some(function(e){return names.indexOf(e.name)>=0&&maxReps(e.sets)>0}))skip=s.date;
-    return !!best;});
-  if(!best)return null;
-  var rw=roadWeek(weekIndex(best.date)),t=rw&&rw[kind]&&!rw[kind].done?rw[kind]:null;best.need=t?+firstInt(t.reps):3;best.hit=best.r>=best.need;best.skip=skip;return best;
+function lastInt(s){var m=String(s||'').match(/\d+/g);return m?m[m.length-1]:''}
+
+/* The last time you did one of these exercises that counts. Gives the heaviest weight that got 3+ reps,
+   all the sets from that day, and the date of a newer off day if one was skipped. */
+function lastWorking(names,before,since){
+  var list=sorted(),skip=null;
+  for(var i=0;i<list.length;i++){
+    var s=list[i];
+    if(s.date>=before)continue;
+    if(since&&s.date<since)break;
+    if(weekIndex(s.date)===DELOAD_WEEK&&s.plan!=='old')continue;
+    var best=null,sets=[];
+    (s.exercises||[]).forEach(function(e){
+      if(names.indexOf(e.name)<0)return;
+      (e.sets||[]).forEach(function(x){
+        if(!(x.r>0))return;
+        sets.push(x);
+        var w=x.w==null?0:+x.w;
+        if(x.r>2&&(!best||w>best.w||(w===best.w&&x.r>best.r)))best={w:w,r:+x.r};
+      });
+    });
+    if(best)return {date:s.date,w:best.w,r:best.r,sets:sets,skip:skip};
+    if(sets.length&&!skip)skip=s.date;
+  }
+  return null;
 }
-/* Today's top set. Bench: 5 lbs more than your last top set, every week. Squat: hit the reps, 5 lbs more; missed, same weight.
-   The week table is only the starting point. */
+/* Last weight + 5, once a week */
+function plusFive(last,wi){
+  if(weekIndex(last.date)===wi)return last.w;
+  return last.w+5;
+}
+function offDay(last){return last.skip?' Your '+fmt(last.skip)+' sets (2 reps or fewer) don’t count.':'';}
+function whyText(last,w,bw){
+  var did=(bw?wl(last.w,true):last.w+' lbs')+' × '+last.r+' on '+fmt(last.date);
+  return 'Last time '+did+'. '+(w===last.w?'You already went up this week, so same weight.':'Up 5 lbs this week.')+offDay(last);
+}
+function sinceReset(){return PROF&&PROF.setAt?PROF.setAt:'';}
+
+/* Top set for bench or squat. The week table is only the starting point. */
 function topTarget(lift,wi,before){
-  var rw=roadWeek(wi),kind=lift==='bench'?'benchTop':'squatTop',plan=rw?rw[kind]:null,last=lastTop(lift,before);
-  if(plan&&plan.done)return plan;
-  if(plan&&plan.easy)return plan;
+  var rw=roadWeek(wi),kind=lift==='bench'?'benchTop':'squatTop',plan=rw?rw[kind]:null;
+  if(plan&&(plan.done||plan.easy))return plan;
+  var names=lift==='bench'?['Bench press – top set','Bench press']:['Squat – top set','Squat'];
+  var last=lastWorking(names,before,sinceReset());
   if(!last)return plan||{w:lift==='bench'?B0:S0,reps:'5',sets:1};
-  var w=(lift==='bench'||last.hit)?last.w+5:last.w,t={w:w,reps:plan?plan.reps:'3–5',sets:1,auto:true,from:last};
-  if(plan&&plan.extra)t.extra=plan.extra;
+  var t={w:plusFive(last,wi),reps:plan?plan.reps:'3–5',sets:1,auto:true,from:last};
+  if(plan&&plan.extra)t.extra='If '+t.w+' lbs flies up, try '+(t.w+10)+' lbs × 1–3 with a spotter.';
   return t;
+}
+/* Back-off sets: last back-off weight + 5. First time: about 85% of the top set. */
+function backTarget(lift,top,before,wi){
+  var reps=wi>=0&&wi<6?'6–8':'5–6';
+  var last=lastWorking([lift==='bench'?'Bench press – back-off sets':'Squat – back-off sets'],before,sinceReset());
+  if(!last)return {w:r5(top.w*0.85),reps:reps,sets:3,why:'First time: about 85% of your top set.'};
+  var w=plusFive(last,wi);
+  return {w:w,reps:reps,sets:3,why:whyText(last,w)};
+}
+/* Thursday volume bench, wide grip 3 × 8: last volume weight + 5.
+   The first wide-grip Thursday stays at the weight you used with your normal grip. */
+var WIDE_FROM='2026-10-23';
+function volTarget(top,before,wi){
+  var last=lastWorking(['Bench press – volume'],before,sinceReset());
+  if(!last)return {w:r5(top.w*0.75),reps:'8',sets:3,why:'First time: about 75% of your top set.'};
+  if(last.date<WIDE_FROM)return {w:last.w,reps:'8',sets:3,why:'First week wide grip, so the same '+last.w+' lbs as your normal-grip sets on '+fmt(last.date)+'.'};
+  var w=plusFive(last,wi);
+  return {w:w,reps:'8',sets:3,why:whyText(last,w)};
 }
 function resolveEx(ex,wi,before){
   var rw=roadWeek(wi),r={name:ex.name,label:ex.label||ex.name,sub:ex.sub||'',media:ex.media||ex.name,rest:ex.rest,bar:!!ex.bar,bw:!!ex.bw,hint:ex.hint||'',kind:ex.kind||null};
   if(ex.kind){
-    var lift=/bench/.test(ex.kind)?'bench':'squat',top=topTarget(lift,wi,before),t;
-    if(/Top/.test(ex.kind)){t=top;
-      if(top.auto)r.hint='Last top set '+top.from.w+' lbs × '+top.from.r+' ('+fmt(top.from.date)+'). '+(lift==='bench'?'Bench goes up 5 lbs every week.':top.from.hit?'You hit the reps, so it’s up 5 lbs.':'Missed the reps, so same weight again.')+(top.from.skip?' Your '+fmt(top.from.skip)+' set (2 reps or fewer) doesn’t count.':'')+(lift==='bench'?'':' Hit '+firstInt(top.reps)+'+ reps and it moves up 5 lbs next week.');}
+    var lift=/bench/.test(ex.kind)?'bench':'squat',top=topTarget(lift,wi,before),t,why='';
+    if(/Top/.test(ex.kind)){t=top;if(top.auto)why='Last top set '+top.from.w+' lbs × '+top.from.r+' on '+fmt(top.from.date)+'. '+(top.w===top.from.w?'You already went up this week, so same weight.':'Up 5 lbs this week.')+offDay(top.from);}
     else if(rw&&rw.deload)t=rw[ex.kind];
-    else if(ex.kind==='benchVol'){t=volTarget(top,before);if(t.why)r.hint=(r.hint?r.hint+' ':'')+t.why;}
-    else if(ex.kind==='benchHeavy'){var mon=top.from&&weekIndex(top.from.date)===wi?top.from.w:top.w;t={w:mon-10,reps:'3',sets:1};}
-    else t={w:r5(top.w*0.85),reps:wi>=0&&wi<6?'6–8':'5–6',sets:3};
-    r.sets=t.sets;r.reps=t.reps;r.w=t.w;r.easy=!!t.easy;r.target=t.sets===1?t.w+' lbs × '+t.reps:t.sets+' × '+t.reps+' @ '+t.w+' lbs';if(t.extra)r.hint=t.extra;return r;
+    else if(ex.kind==='benchVol'){t=volTarget(top,before,wi);why=t.why;}
+    else if(ex.kind==='benchHeavy')t={w:top.w-10,reps:'3',sets:1};
+    else{t=backTarget(lift,top,before,wi);why=t.why;}
+    if(t.extra)why=(why?why+' ':'')+t.extra;
+    if(why)r.hint=(r.hint?r.hint+' ':'')+why;
+    r.sets=t.sets;r.reps=t.reps;r.w=t.w;r.easy=!!t.easy;r.target=t.sets===1?t.w+' lbs × '+t.reps:t.sets+' × '+t.reps+' @ '+t.w+' lbs';return r;
   }
   r.sets=ex.sets;r.reps=ex.reps;r.w=null;
   if(ex.backext){if(CFG.seed){var pl=wi<=0?0:wi===1?1:2;r.phw=pl*45;r.plates=pl;r.hint=pl?'Hold '+pl+' plate'+(pl>1?'s':'')+' ('+pl*45+' lbs) against your chest.':'Bodyweight.';}else r.hint='Bodyweight. Hold a plate once 3 × 15 feels easy.';}
   if(rw&&rw.deload){r.sets=Math.max(1,Math.ceil(ex.sets/2));r.hint='Deload: about 10% lighter than last week.';}
   r.target=r.sets+' × '+r.reps+(r.plates?' · '+r.plates+' plate'+(r.plates>1?'s':''):'');return r;
 }
-/* Thursday volume bench, 3 × 8 wide grip. Last Thursday all 3 sets got 8: up 5 lbs. Otherwise the same weight until they do. */
-var WIDE_FROM='2026-10-23';
-function volTarget(top,before){
-  var t={w:r5(top.w*0.75),reps:'8',sets:3},last=null,skip=null;
-  sorted().some(function(s){if(s.date>=before)return false;
-    var e=(s.exercises||[]).filter(function(x){return x.name==='Bench press – volume'&&maxReps(x.sets)>0})[0];if(!e)return false;
-    if(maxReps(e.sets)<=2){if(!skip)skip=s.date;return false;}
-    last={date:s.date,sets:e.sets};return true;});
-  if(!last){t.why='First time: about 75% of your top set.';return t;}
-  var sets=last.sets.filter(function(x){return x.w>0&&x.r>0}),W=Math.max.apply(null,sets.map(function(x){return x.w}));
-  var atW=sets.filter(function(x){return x.w===W}),all8=atW.length>=3&&atW.every(function(x){return x.r>=8});
-  var when=fmt(last.date)+(skip?' (your '+fmt(skip)+' sets don’t count, 2 reps or fewer)':'');
-  if(last.date<WIDE_FROM){t.w=W;t.why='First week wide grip, so same weight as '+when+'.';}
-  else if(all8){t.w=W+5;t.why='All 3 sets got 8 at '+W+' lbs on '+when+'. Up 5.';}
-  else{t.w=W;t.why='Not all 3 sets got 8 at '+W+' lbs on '+when+'. Same weight until they do.';}
-  return t;
-}
-/* Recommended weight for everything else: double progression on the last time you did this exercise in this workout. */
-function lastInt(s){var m=String(s||'').match(/\d+/g);return m?m[m.length-1]:''}
-function recommend(rex,before,key){
-  if(rex.w!=null||rex.phw!=null||rex.swapped||rex.extra)return null;
-  var last=lastTime(rex.name,before,key),lo0=+firstInt(rex.reps)||1,skip=null;
-  while(last&&lo0>=3&&maxReps(last.sets)>0&&maxReps(last.sets)<=2){if(!skip)skip=last.date;last=lastTime(rex.name,last.date,key);}
+/* Suggested weight for everything that isn't bench or squat */
+function recommend(rex,before){
+  if(rex.w!=null||rex.phw!=null)return null;
+  var last=lastWorking(namesFor(rex.name),before);
   if(!last)return null;
-  var skipTxt=skip?' ('+fmt(skip)+' doesn’t count, 2 reps or fewer.)':'';
-  var sets=last.sets.filter(function(x){return x.r>0&&(x.w!=null||rex.bw)}).map(function(x){return {w:x.w==null?0:x.w,r:x.r}});if(!sets.length)return null;
-  var lo=+firstInt(rex.reps)||1,hi=+lastInt(rex.reps)||lo,W=Math.max.apply(null,sets.map(function(x){return x.w})),atW=sets.filter(function(x){return x.w===W}),inc=5;
-  var plan=Math.max(1,rex.sets),full=atW.length>=Math.min(plan,sets.length),allHi=full&&atW.every(function(x){return x.r>=hi}),anyLo=atW.some(function(x){return x.r<lo});
-  var cur=rex.bw?(W>0?'+'+W+' lbs':'bodyweight'):W+' lbs';
-  if(/leg raise|knee raise/i.test(rex.name))return {w:W,why:allHi?'Bodyweight, slower reps. You’re at the top of the range.':'Bodyweight. Work up to '+hi+' clean reps.',same:true};
-  if(allHi)return {w:W+inc,why:'Every set hit '+hi+(sets.length>1?'+ reps':' reps')+' at '+cur+' last time. Go up 5.'+skipTxt,up:true};
-  if(anyLo)return {w:W,why:'A set fell under '+lo+' reps at '+cur+'. Same weight, get all sets to '+lo+'+.'+skipTxt,same:true};
-  return {w:W,why:'Same '+cur+'. Push every set to '+hi+' reps, then it goes up.'+skipTxt,same:true};
+  var wi=weekIndex(before),rw=roadWeek(wi),hi=+lastInt(rex.reps)||1;
+  if(rex.bw&&last.w===0){
+    // bodyweight only (pull-ups): add 5 lbs once every set reaches the top of the range
+    var allHi=last.sets.every(function(x){return +x.r>=hi});
+    if(allHi&&weekIndex(last.date)!==wi)return {w:5,why:'Every set hit '+hi+' reps at bodyweight on '+fmt(last.date)+'. Add 5 lbs.'+offDay(last),up:true};
+    return {w:0,why:'Bodyweight. Get every set to '+hi+' reps, then add 5 lbs.'+offDay(last),same:true};
+  }
+  if(rw&&rw.deload)return {w:r5(last.w*0.9),why:'Deload week: about 10% lighter than last time ('+wl(last.w,rex.bw)+').',same:true};
+  var w=plusFive(last,wi);
+  return {w:w,why:whyText(last,w,rex.bw),up:w>last.w,same:w===last.w};
 }
 
 /* ================= state ================= */
@@ -627,31 +662,42 @@ function draftFor(key){
 function saveDrafts(){LS.set(K.drafts,S.drafts)}
 function exList(w,d){
   var wi=weekIndex(d.date),list=w.ex.map(function(ex){var r=resolveEx(ex,wi,d.date);r.key=ex.name;r.base=ex.name;
-    if(d.swap[ex.name]){r.name=d.swap[ex.name];r.label=d.swap[ex.name];r.sub='Swapped in';r.media=d.swap[ex.name];r.swapped=true;r.kind=null;r.bar=false;r.w=null;r.hint='';r.target=r.sets+' × '+r.reps;}
+    if(d.swap[ex.name]){r.name=d.swap[ex.name];r.label=d.swap[ex.name];r.sub='Swapped in';r.media=d.swap[ex.name];r.swapped=true;r.kind=null;r.bar=false;r.bw=isBwName(d.swap[ex.name]);r.w=null;r.hint='';r.target=r.sets+' × '+r.reps;}
     return r;});
-  d.extra.forEach(function(x,i){list.push({key:'extra:'+i,base:null,name:x.name,label:x.name,sub:'Added today',media:x.name,sets:x.sets||3,reps:x.reps||'8–12',rest:x.rest||90,target:(x.sets||3)+' × '+(x.reps||'8–12'),extra:true,w:null,kind:null});});
+  d.extra.forEach(function(x,i){list.push({key:'extra:'+i,base:null,name:x.name,label:x.name,sub:'Added today',media:x.name,bw:isBwName(x.name),sets:x.sets||3,reps:x.reps||'8–12',rest:x.rest||90,target:(x.sets||3)+' × '+(x.reps||'8–12'),extra:true,w:null,kind:null});});
   return list;
 }
 function exDraft(d,rex){var e=d.ex[rex.key];if(!e){e={sets:[],note:''};for(var i=0;i<rex.sets;i++)e.sets.push({w:'',r:'',done:false});d.ex[rex.key]=e;}return e;}
 function sorted(){return S.sessions.slice().sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:(b.savedAt||0)-(a.savedAt||0)})}
 function namesFor(n){return [n].concat(ALIASES[n]||[])}
-/* The last time you did this exercise. With a workout key: the last time you did it in THAT workout (so Thursday's
-   lateral raises show last Thursday, not Monday). Falls back to any workout, old plan included, if this one has no history. */
-function lastTime(name,before,key){
-  var names=namesFor(name),list=sorted(),fb=null;
-  for(var i=0;i<list.length;i++){var s=list[i];if(s.date>=before)continue;
-    for(var j=0;j<(s.exercises||[]).length;j++){var e=s.exercises[j];if(names.indexOf(e.name)<0||!((e.sets||[]).some(function(x){return x.r})||e.note))continue;
-      var hit={date:s.date,sets:e.sets||[],note:e.note||'',key:s.key,title:s.title||'',same:!key||s.key===key};
-      if(hit.same)return hit;if(!fb)fb=hit;}}
-  return fb;
+/* What you did the last time you did this exercise, any day. For bench and squat it's every bench (or squat)
+   set from that day: top set, back-offs, heavy set, wide-grip volume. */
+function lastDone(rex,before){
+  var names=namesFor(rex.name);
+  if(rex.kind)names=/bench/.test(rex.kind)?LIFTS.bench:LIFTS.squat;
+  var list=sorted();
+  for(var i=0;i<list.length;i++){
+    var s=list[i];
+    if(s.date>=before)continue;
+    var parts=(s.exercises||[]).filter(function(e){
+      return names.indexOf(e.name)>=0&&((e.sets||[]).some(function(x){return x.r})||e.note);
+    });
+    if(parts.length)return {date:s.date,title:s.title||'',parts:parts};
+  }
+  return null;
+}
+function allSets(last){var out=[];last.parts.forEach(function(e){out=out.concat(e.sets||[])});return out;}
+function partLabel(name,date){
+  if(name==='Bench press – volume')return date>=WIDE_FROM?'WIDE GRIP':'VOLUME';
+  return ({'Bench press – top set':'TOP SET','Bench press – back-off sets':'BACK-OFF','Bench press – heavy set':'HEAVY SET','Squat – top set':'TOP SET','Squat – back-off sets':'BACK-OFF','Bench press':'BENCH','Squat':'SQUAT'})[name]||'SETS';
 }
 function bestSet(sets){var b=null;(sets||[]).forEach(function(x){if(x.w>0&&x.r>0&&(!b||e1rm(x.w,x.r)>e1rm(b.w,b.r)))b=x;});return b;}
 function bestE1rm(name,before){var names=namesFor(name),best=0;S.sessions.forEach(function(s){if(s.date>=before)return;(s.exercises||[]).forEach(function(e){if(names.indexOf(e.name)<0)return;(e.sets||[]).forEach(function(x){if(x.w>0&&x.r>0)best=Math.max(best,e1rm(x.w,x.r));});});});return best;}
-function phWeight(rex,before,key){
+function phWeight(rex,before){
   if(rex.w!=null)return String(rex.w);if(rex.phw!=null)return String(rex.phw);
-  var rec=recommend(rex,before,key);if(rec)return String(rec.w);
+  var rec=recommend(rex,before);if(rec)return String(rec.w);
   if(rex.bw)return '0';
-  var last=lastTime(rex.name,before,key),lw=null;if(last)last.sets.forEach(function(s){if(s.w!=null&&(lw==null||s.w>lw))lw=s.w;});
+  var last=lastDone(rex,before),lw=null;if(last)allSets(last).forEach(function(s){if(s.w!=null&&(lw==null||s.w>lw))lw=s.w;});
   if(lw!=null)return String(lw);return START_W[rex.name]!=null?String(START_W[rex.name]):'';
 }
 function setsText(sets,bw){return (sets||[]).filter(function(x){return x.r}).map(function(x){return wl(x.w,bw)+'\u00a0×\u00a0'+x.r;}).join('  ·  ');}
@@ -675,19 +721,24 @@ var CHECK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L
 function renderWeeks(ds){var wi=weekIndex(ds);weeksEl.textContent=(wi>=0&&wi<=10)?'Week '+(wi+1)+' of 11':'';}
 function segHtml(items,cur,attr){var idx=0;items.forEach(function(x,i){if(x[0]===cur)idx=i;});return '<div class="seg" role="group" style="--n:'+items.length+'"><span class="seg__thumb" style="transform:translateX('+(idx*100)+'%)" aria-hidden="true"></span>'+items.map(function(x){return '<button type="button" '+attr+'="'+x[0]+'" aria-pressed="'+(x[0]===cur)+'">'+esc(x[1])+(x[2]?'<small>'+esc(x[2])+'</small>':'')+'</button>'}).join('')+'</div>';}
 function slideSeg(b,fn){var th=b.parentNode.querySelector('.seg__thumb'),idx=Array.prototype.indexOf.call(b.parentNode.querySelectorAll('button'),b);if(th&&!reduced){th.style.transform='translateX('+(idx*100)+'%)';setTimeout(function(){keepScroll(fn)},160);}else keepScroll(fn);}
-function lastBlock(rex,before,key){
-  var last=lastTime(rex.name,before,key),any=last?lastTime(rex.name,before,null):null,rec=recommend(rex,before,key),h='';
+function lastBlock(rex,before){
+  var last=lastDone(rex,before),rec=recommend(rex,before),h='';
   if(!last&&!rec)return '';
-  if(last){var b=bestSet(last.sets),t=setsText(last.sets,rex.bw),where=last.same?'':' · '+(CODE[last.key]||'other day');
-    h+='<div class="last"><span class="k">LAST TIME'+esc(where)+'</span><span class="v">'+esc(fmt(last.date,{weekday:'short',month:'short',day:'numeric'}))+(b?' · best <em>'+esc(wl(b.w,rex.bw)+'\u00a0×\u00a0'+b.r)+'</em>':'')+'</span>'+
-      (t?'<span class="k">SETS</span><span class="v num" style="font-weight:500;color:var(--tx2)">'+esc(t)+'</span>':'')+(last.note?'<span class="n">“'+esc(last.note)+'”</span>':'');
-    if(any&&any.date!==last.date&&any.key!==last.key){var ab=bestSet(any.sets);h+='<span class="k">ALSO</span><span class="v" style="font-weight:500;color:var(--tx2)">'+esc(fmt(any.date,{weekday:'short',month:'short',day:'numeric'}))+' · '+esc(CODE[any.key]||any.title||'other day')+(ab?' · '+esc(wl(ab.w,rex.bw)+'\u00a0×\u00a0'+ab.r):'')+'</span>';}
-    h+='</div>';}
+  if(last){
+    var one=last.parts.length===1,b=one?bestSet(last.parts[0].sets):null;
+    h+='<div class="last"><span class="k">LAST TIME</span><span class="v">'+esc(fmt(last.date,{weekday:'short',month:'short',day:'numeric'})+(last.title?' · '+last.title:''))+(b?' · best <em>'+esc(wl(b.w,rex.bw)+' × '+b.r)+'</em>':'')+'</span>';
+    last.parts.forEach(function(e){
+      var t=setsText(e.sets,rex.bw);
+      if(t)h+='<span class="k">'+esc(one?'SETS':partLabel(e.name,last.date))+'</span><span class="v num" style="font-weight:500;color:var(--tx2)">'+esc(t)+'</span>';
+      if(e.note)h+='<span class="n">“'+esc(e.note)+'”</span>';
+    });
+    h+='</div>';
+  }
   if(rec)h+='<div class="rec'+(rec.up?' rec--up':'')+'"><span class="k">'+(rec.up?'GO UP':'NEXT')+'</span><span class="v"><em class="num">'+esc(wl(rec.w,rex.bw))+'</em>'+(rex.reps?' × '+esc(rex.reps):'')+'<span class="n">'+esc(rec.why)+'</span></span></div>';
   return h;
 }
-function setRows(rex,e,before,idx,key){
-  var phW=phWeight(rex,before,key),phR=firstInt(rex.reps),h='',nm=esc(rex.label+(rex.sub?', '+rex.sub:''));
+function setRows(rex,e,before,idx){
+  var phW=phWeight(rex,before),phR=firstInt(rex.reps),h='',nm=esc(rex.label+(rex.sub?', '+rex.sub:''));
   h+='<div class="sethead" aria-hidden="true"><span>SET</span><span>'+(rex.bw?'ADDED LBS':'LBS')+'</span><span>REPS</span><span></span></div>';
   e.sets.forEach(function(s,j){var n=j+1;
     h+='<div class="set'+(s.done?' is-done':'')+'" data-set="'+j+'" role="group" aria-label="'+nm+', set '+n+'"><span class="set__n" aria-hidden="true">'+n+'</span>'+
@@ -713,7 +764,7 @@ function renderToday(){
   if(d.saved)h+=receipt(w,d);
   h+='<ul class="list" aria-label="Exercises" style="list-style:none;padding:0">';
   list.forEach(function(rex,i){
-    var e=drafts[i],open=S.openEx[w.key]===i,done=e.sets.filter(function(s){return s.done}).length,complete=done===e.sets.length&&done>0,last=lastTime(rex.name,d.date,w.key),b=last?bestSet(last.sets):null,isMain=!!rex.kind,rec=recommend(rex,d.date,w.key);
+    var e=drafts[i],open=S.openEx[w.key]===i,done=e.sets.filter(function(s){return s.done}).length,complete=done===e.sets.length&&done>0,last=lastDone(rex,d.date),b=last?bestSet(allSets(last)):null,isMain=!!rex.kind,rec=recommend(rex,d.date);
     h+='<li class="ex'+(open?' open':'')+(complete?' is-complete':'')+(isMain?' is-main':'')+'" data-ex="'+i+'">'+(S.prFlash===String(i)?'<span class="pr" aria-hidden="true">NEW BEST</span>':'')+
       '<h2><button type="button" class="ex__head" data-act="toggle" aria-expanded="'+open+'" aria-controls="exb-'+i+'"><span class="ex__name">'+esc(rex.label)+(rex.sub&&rex.sub!=='Swapped in'&&rex.sub!=='Added today'?' <span class="ex__kind">'+esc(rex.sub)+'</span>':'')+'</span>'+
       '<span class="ex__sub"><span class="count" aria-hidden="true">'+e.sets.map(function(s){return '<i'+(s.done?' class="on"':'')+'></i>'}).join('')+'</span>'+(b?'Last <em class="num">'+esc(wl(b.w,rex.bw)+' × '+b.r)+'</em> · '+esc(fmt(last.date)):(last?'Last '+esc(fmt(last.date)):'No history yet'))+(rex.swapped?' · swapped':'')+'</span>'+
@@ -721,7 +772,7 @@ function renderToday(){
     var body='';
     if(rex.w)body+='<p class="tgt"><span class="sr">Target: '+esc(rex.target)+'</span><span class="w num" aria-hidden="true">'+rex.w+'<small>lbs</small></span><span class="x" aria-hidden="true">× '+esc(rex.reps)+' · '+(rex.sets===1?'1 heavy set':rex.sets+' sets')+(rex.easy?' · easy':'')+'</span></p>'+(rex.bar?plateChips(rex.w):'');
     if(rex.hint)body+='<p class="hint">'+esc(rex.hint)+'</p>';
-    h+='<div class="ex__body" id="exb-'+i+'"><div><div class="ex__inner">'+body+lastBlock(rex,d.date,w.key)+setRows(rex,e,d.date,i,w.key)+'</div></div></div></li>';});
+    h+='<div class="ex__body" id="exb-'+i+'"><div><div class="ex__inner">'+body+lastBlock(rex,d.date)+setRows(rex,e,d.date,i)+'</div></div></div></li>';});
   h+='<li class="ex add-row">'+(S.addOpen?'<label class="flabel" for="addIn">Add an exercise to today</label><div class="inline" style="margin:0 0 12px"><input class="field" id="addIn" placeholder="e.g. Chest fly machine" autocomplete="off"><button type="button" class="btn" data-act="addgo">Add</button></div>':'<button type="button" class="link" data-act="addopen" style="min-height:52px">+ Add exercise</button>')+'</li></ul>';
   h+='<label class="dateline">Logging this for <input type="date" data-f="date" value="'+esc(d.date)+'"></label></div>';
   main.innerHTML=h;S.prFlash=null;updateFinish();
@@ -785,7 +836,6 @@ function roadList(lift){
       var hit=t.done||(res.w>=t.w&&res.r>=+firstInt(t.reps));
       if(hit){cls='hit';if(!t.done)mark=' ✓';}
       else if(res.r<=2){cls='miss';mark=' · doesn’t count';}
-      else if(lift==='squat'){cls='miss';mark=' · repeat';}
     }
     if(i===now)cls+=' now';
     h+='<li class="'+cls+'"><span class="wk">'+esc(weekStart(i).toLocaleDateString('en-CA',{month:'short',day:'numeric'}))+'</span><span class="tg">'+esc(t.done?'Done Tue':t.w+' lbs × '+t.reps)+(rw.deload?' <span style="color:var(--tx3);font-weight:500">deload</span>':'')+'</span><span class="res">'+esc((txt||(i===now?'This week':''))+mark)+'</span></li>';
@@ -802,7 +852,7 @@ function liftCards(lift){
     var nx=nextBenchTarget();if(nx)h+='<p class="next"><b>'+nx.w+' lbs × '+esc(nx.reps)+'</b>next top set · '+esc(nx.date.toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'}))+(nx.easy?' · deload':'')+'</p>';}
   h+=chart(ser,GOAL,'315 lbs',(lift==='bench'?'Bench':'Squat')+' estimated max over time');
   h+='<p class="fine">Estimated max = weight × (1 + reps ÷ 30).'+(lift==='bench'?' 3 plates is a long road. Eating enough to get to '+BWG+'+ lbs is a big part of it.':'')+'</p></section>';
-  h+='<section class="card" aria-labelledby="rb-h"><h2 id="rb-h">'+(lift==='bench'?'This block · '+(CFG.seed?'back to 235':'top sets'):'This block')+'</h2><p class="eyebrow" style="margin-top:4px">'+(lift==='bench'?'Up 5 lbs every week from your last top set. 2 reps or fewer doesn’t count.':'Hit the reps: up 5 lbs. Missed: same weight again.')+'</p>'+roadList(lift)+'</section>';
+  h+='<section class="card" aria-labelledby="rb-h"><h2 id="rb-h">'+(lift==='bench'?'This block · '+(CFG.seed?'back to 235':'top sets'):'This block')+'</h2><p class="eyebrow" style="margin-top:4px">Up 5 lbs every week from your last top set. 2 reps or fewer doesn’t count.</p>'+roadList(lift)+'</section>';
   return h;
 }
 function weightCard(){
@@ -880,14 +930,14 @@ function saveProfile(full){var r=readProfile(full);if(!r)return;LS.set(P+'.profi
   if(r.bw){var t=todayStr();S.bw=S.bw.filter(function(x){return x.date!==t}).concat([{date:t,lbs:r.bw}]);persist();}
   toast(full?'You’re set. Let’s go.':r.changed?'Saved. The block restarts this week from your new numbers.':'Numbers saved');setTimeout(function(){location.reload()},r.changed&&!full?1400:500);}
 function profileCard(){
-  var h='<section class="card" aria-labelledby="pf-h"><h2 id="pf-h">Your numbers</h2><p class="fine" style="margin-top:6px">These set your bench and squat targets, your food targets and your weight goal. After that the app follows what you actually log: hit the reps and the weight goes up.</p>';
+  var h='<section class="card" aria-labelledby="pf-h"><h2 id="pf-h">Your numbers</h2><p class="fine" style="margin-top:6px">These set your bench and squat targets, your food targets and your weight goal. After that it follows what you log: every exercise goes up 5 lbs a week from the last weight you did.</p>';
   h+='<div class="srow" style="margin-top:8px"><span>Bench 5-rep max</span><span>'+B0+' lbs</span></div><div class="srow"><span>Squat 5-rep max</span><span>'+S0+' lbs</span></div><div class="srow"><span>Height</span><span>'+ftIn(HT)+'</span></div><div class="srow"><span>Goal bodyweight</span><span>'+BWG+' lbs</span></div>';
   if(S.profOpen)h+='<div style="margin-top:6px">'+profileFields(false)+'<div class="actions-row"><button type="button" class="btn" data-act="pf-save">Save numbers</button><button type="button" class="btn btn--ghost" data-act="pf-cancel">Cancel</button></div></div>';
   else h+='<div class="actions-row"><button type="button" class="btn btn--ghost" data-act="pf-edit">Change numbers</button></div>';
   return h+'</section>';}
 function renderSetup(){document.body.classList.add('setup');finishEl.classList.remove('show');document.body.classList.remove('has-finish');weeksEl.innerHTML='';
   main.innerHTML='<div class="enter"><div class="pagehead"><h1>Let’s set you up</h1><p class="about">Takes a minute. Your numbers set your targets; after that the app follows what you log. You can change them later in Settings.</p></div>'+
-    '<section class="card">'+profileFields(true)+'<p class="fine">Not sure about bench or squat? Guess a bit low. The weight goes up 5 lbs every time you hit your reps.</p>'+
+    '<section class="card">'+profileFields(true)+'<p class="fine">Not sure about bench or squat? Guess a bit low. Every exercise goes up 5 lbs a week from there.</p>'+
     '<button type="button" class="btn" data-act="setup-go" style="width:100%;margin-top:16px">Start training</button><button type="button" class="btn btn--ghost" data-act="restore" style="width:100%;margin-top:10px">Have a backup? Restore it</button></section></div>';}
 function renderSettings(){
   renderWeeks(todayStr());var lbk=LS.get(P+'.lastBackup',null),stale=!lbk||(Date.now()-parseYmd(lbk).getTime())>14*DAY;
@@ -1060,7 +1110,7 @@ function shareFile(name,text,type,done){done=done||function(){};
 /* What would be saved right now from this draft (doSave and the summary both use this) */
 function draftSession(w,d){
   var list=exList(w,d),exs=[],any=false,prs=0,skipped=[];
-  list.forEach(function(rex){var e=d.ex[rex.key],sets=[];if(e){var ph=num(phWeight(rex,d.date,w.key));sets=e.sets.filter(function(s){return s.r!==''}).map(function(s){if(s.pr)prs++;return {w:s.w===''?ph:num(s.w),r:num(s.r)};}).filter(function(s){return s.r!=null});}
+  list.forEach(function(rex){var e=d.ex[rex.key],sets=[];if(e){var ph=num(phWeight(rex,d.date));sets=e.sets.filter(function(s){return s.r!==''}).map(function(s){if(s.pr)prs++;return {w:s.w===''?ph:num(s.w),r:num(s.r)};}).filter(function(s){return s.r!=null});}
     if(sets.length)any=true;else skipped.push(rex.label);if(e&&(sets.length||e.note))exs.push({name:rex.name,target:rex.target,sets:sets,note:e.note||''});});
   return {exs:exs,any:any,prs:prs,skipped:skipped};
 }
