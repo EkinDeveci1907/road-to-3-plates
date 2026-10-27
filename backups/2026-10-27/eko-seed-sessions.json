@@ -1,0 +1,786 @@
+{
+ "sessions": [
+  {
+   "id": "2026-09-16-old",
+   "date": "2026-09-16",
+   "key": "old",
+   "plan": "old",
+   "title": "Arms + shoulders (old plan)",
+   "savedAt": 0,
+   "exercises": [
+    {
+     "name": "Shoulder press",
+     "sets": [
+      {
+       "w": 50,
+       "r": 10
+      },
+      {
+       "w": 50,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Cable lateral raise",
+     "sets": [
+      {
+       "w": 10,
+       "r": 20
+      },
+      {
+       "w": 10,
+       "r": 20
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Rear delt cable",
+     "sets": [
+      {
+       "w": 160,
+       "r": 15
+      },
+      {
+       "w": 180,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Dips",
+     "sets": [
+      {
+       "w": 0,
+       "r": 10
+      },
+      {
+       "w": 30,
+       "r": 15
+      },
+      {
+       "w": 30,
+       "r": 12
+      }
+     ],
+     "note": "Go harder next time"
+    },
+    {
+     "name": "Barbell curl",
+     "sets": [
+      {
+       "w": 55,
+       "r": 10
+      },
+      {
+       "w": 55,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Tricep pushdown",
+     "sets": [
+      {
+       "w": 30,
+       "r": 10
+      },
+      {
+       "w": 50,
+       "r": 12
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Hammer curl",
+     "sets": [
+      {
+       "w": 30,
+       "r": 12
+      }
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "2026-09-21-old",
+   "date": "2026-09-21",
+   "key": "old",
+   "plan": "old",
+   "title": "Upper, heavy (old plan)",
+   "savedAt": 0,
+   "exercises": [
+    {
+     "name": "Bench press",
+     "sets": [
+      {
+       "w": 185,
+       "r": 5
+      },
+      {
+       "w": 165,
+       "r": 5
+      },
+      {
+       "w": 175,
+       "r": 5
+      },
+      {
+       "w": 155,
+       "r": 5
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Barbell row",
+     "sets": [
+      {
+       "w": 95,
+       "r": 8
+      },
+      {
+       "w": 135,
+       "r": 6
+      },
+      {
+       "w": 135,
+       "r": 6
+      },
+      {
+       "w": 135,
+       "r": 8
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Overhead press",
+     "sets": [
+      {
+       "w": 65,
+       "r": 7
+      },
+      {
+       "w": 65,
+       "r": 8
+      },
+      {
+       "w": 65,
+       "r": 7
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Pull-ups",
+     "sets": [
+      {
+       "w": null,
+       "r": 12
+      },
+      {
+       "w": null,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Incline DB press",
+     "sets": [
+      {
+       "w": 65,
+       "r": 8
+      },
+      {
+       "w": 60,
+       "r": 8
+      },
+      {
+       "w": 55,
+       "r": 10
+      }
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "2026-09-23-old",
+   "date": "2026-09-23",
+   "key": "old",
+   "plan": "old",
+   "title": "Arms + shoulders (old plan)",
+   "savedAt": 0,
+   "exercises": [
+    {
+     "name": "Shoulder press",
+     "sets": [
+      {
+       "w": 55,
+       "r": 8
+      },
+      {
+       "w": 50,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Cable lateral raise",
+     "sets": [
+      {
+       "w": 20,
+       "r": 20
+      },
+      {
+       "w": 20,
+       "r": 20
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Rear delt cable",
+     "sets": [
+      {
+       "w": 120,
+       "r": 12
+      },
+      {
+       "w": 120,
+       "r": 12
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Dips",
+     "sets": [
+      {
+       "w": 0,
+       "r": 10
+      },
+      {
+       "w": 45,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Barbell curl",
+     "sets": [
+      {
+       "w": 25,
+       "r": 10
+      },
+      {
+       "w": 25,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Tricep pushdown",
+     "sets": [
+      {
+       "w": 40,
+       "r": 10
+      },
+      {
+       "w": 55,
+       "r": 8
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Hammer curl",
+     "sets": [
+      {
+       "w": 30,
+       "r": 8
+      },
+      {
+       "w": 30,
+       "r": 8
+      }
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "2026-09-24-old",
+   "date": "2026-09-24",
+   "key": "old",
+   "plan": "old",
+   "title": "Legs (old plan)",
+   "savedAt": 0,
+   "exercises": [
+    {
+     "name": "Squat",
+     "sets": [
+      {
+       "w": 95,
+       "r": 6
+      },
+      {
+       "w": 135,
+       "r": 6
+      },
+      {
+       "w": 165,
+       "r": 6
+      },
+      {
+       "w": 185,
+       "r": 5
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Romanian deadlift",
+     "sets": [
+      {
+       "w": 95,
+       "r": 8
+      },
+      {
+       "w": 115,
+       "r": 8
+      },
+      {
+       "w": 135,
+       "r": 8
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Leg press / Bulgarian split squat",
+     "sets": [
+      {
+       "w": 90,
+       "r": 10
+      },
+      {
+       "w": 180,
+       "r": 10
+      },
+      {
+       "w": 180,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Leg curl",
+     "sets": [
+      {
+       "w": 60,
+       "r": 10
+      },
+      {
+       "w": 70,
+       "r": 10
+      },
+      {
+       "w": 80,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Calf raises",
+     "sets": [],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "2026-09-30-lowerA",
+   "date": "2026-09-30",
+   "key": "lowerA",
+   "plan": "new",
+   "title": "Lower A",
+   "savedAt": 0,
+   "exercises": [
+    {
+     "name": "Squat \u2013 top set",
+     "sets": [
+      {
+       "w": 185,
+       "r": 5
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Squat \u2013 back-off sets",
+     "sets": [
+      {
+       "w": 155,
+       "r": 6
+      },
+      {
+       "w": 155,
+       "r": 8
+      },
+      {
+       "w": 155,
+       "r": 8
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Romanian deadlift",
+     "sets": [
+      {
+       "w": 135,
+       "r": 8
+      },
+      {
+       "w": 145,
+       "r": 8
+      },
+      {
+       "w": 145,
+       "r": 8
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Leg curl",
+     "sets": [
+      {
+       "w": 60,
+       "r": 10
+      },
+      {
+       "w": 90,
+       "r": 10
+      },
+      {
+       "w": 70,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Leg extension",
+     "sets": [
+      {
+       "w": 80,
+       "r": 10
+      },
+      {
+       "w": 80,
+       "r": 10
+      },
+      {
+       "w": 80,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Horizontal calf raise",
+     "sets": [
+      {
+       "w": 220,
+       "r": 20
+      },
+      {
+       "w": 220,
+       "r": 20
+      },
+      {
+       "w": 220,
+       "r": 20
+      }
+     ],
+     "note": "no standing calf raise at goodlife"
+    },
+    {
+     "name": "Hanging leg raise",
+     "sets": [
+      {
+       "w": 0,
+       "r": 10
+      },
+      {
+       "w": 0,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Cable crunch",
+     "sets": [
+      {
+       "w": 60,
+       "r": 10
+      },
+      {
+       "w": 60,
+       "r": 12
+      },
+      {
+       "w": 60,
+       "r": 12
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Back extension (hyperextension)",
+     "sets": [
+      {
+       "w": 0,
+       "r": 12
+      },
+      {
+       "w": 0,
+       "r": 12
+      }
+     ],
+     "note": "only did 2 sets i was hurting"
+    }
+   ]
+  },
+  {
+   "id": "2026-09-29-old",
+   "date": "2026-09-29",
+   "key": "old",
+   "plan": "old",
+   "title": "Quick upper (old plan)",
+   "savedAt": 0,
+   "exercises": [
+    {
+     "name": "Bench press",
+     "sets": [
+      {
+       "w": 185,
+       "r": 5
+      },
+      {
+       "w": 175,
+       "r": 5
+      },
+      {
+       "w": 165,
+       "r": 5
+      },
+      {
+       "w": 165,
+       "r": 5
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Incline DB press",
+     "sets": [
+      {
+       "w": 70,
+       "r": 6
+      },
+      {
+       "w": 60,
+       "r": 8
+      },
+      {
+       "w": 60,
+       "r": 8
+      }
+     ],
+     "note": "70 was bad do better form next time back was messed up n shi"
+    },
+    {
+     "name": "Lat pull down",
+     "sets": [
+      {
+       "w": 65,
+       "r": 10
+      },
+      {
+       "w": 85,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Machine row",
+     "sets": [],
+     "note": ""
+    },
+    {
+     "name": "Pull-ups",
+     "sets": [],
+     "note": ""
+    },
+    {
+     "name": "Chest fly machine",
+     "sets": [
+      {
+       "w": 130,
+       "r": 10
+      }
+     ],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "2026-10-01-upperB",
+   "date": "2026-10-01",
+   "key": "upperB",
+   "plan": "new",
+   "title": "Upper B",
+   "src": "sheet",
+   "savedAt": 0,
+   "exercises": [
+    {
+     "name": "Incline DB press",
+     "sets": [
+      {
+       "w": 60,
+       "r": 8
+      },
+      {
+       "w": 55,
+       "r": 10
+      },
+      {
+       "w": 55,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Lat pulldown",
+     "sets": [
+      {
+       "w": 70,
+       "r": 10
+      },
+      {
+       "w": 60,
+       "r": 12
+      },
+      {
+       "w": 60,
+       "r": 8
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Chest-supported / machine row",
+     "sets": [
+      {
+       "w": 70,
+       "r": 10
+      },
+      {
+       "w": 75,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Cable lateral raise",
+     "sets": [
+      {
+       "w": 5,
+       "r": 20
+      },
+      {
+       "w": 10,
+       "r": 20
+      },
+      {
+       "w": 10,
+       "r": 20
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Rear delt cable",
+     "sets": [
+      {
+       "w": 65,
+       "r": 12
+      },
+      {
+       "w": 80,
+       "r": 12
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Weighted dips",
+     "sets": [
+      {
+       "w": 45,
+       "r": 10
+      },
+      {
+       "w": 45,
+       "r": 10
+      }
+     ],
+     "note": ""
+    },
+    {
+     "name": "Incline DB curl",
+     "sets": [
+      {
+       "w": 20,
+       "r": 8
+      },
+      {
+       "w": 20,
+       "r": 8
+      },
+      {
+       "w": 20,
+       "r": 10
+      }
+     ],
+     "note": ""
+    }
+   ]
+  }
+ ],
+ "bw": [
+  {
+   "date": "2026-09-20",
+   "lbs": 138
+  }
+ ]
+}
