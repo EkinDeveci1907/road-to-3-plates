@@ -1,11 +1,12 @@
 # Backup taken Oct 27, 2026 (before the v4.9 update)
 
 What this folder holds:
-- eko-seed-sessions.json / .csv: every workout Eko's copy ships with (Sept 16 to Oct 1, 2026) plus the Sept 20 weigh-in.
-- eko-backup-2026-10-16.json / eko-workouts-2026-10-16.csv: Eko's phone backup from Oct 16 (same 7 workouts).
+- eko-workouts-2026-10-27.csv: Eko's full export from his phone, all 21 workouts, Sept 16 to Oct 26, 2026.
+- eko-backup-2026-10-27.json: the same 21 workouts in the app's restore format. Settings, Restore backup, pick this file. Tested: a fresh install goes to 21 workouts and the bench chain reads right.
+- eko-seed-sessions.json / .csv: the 7 workouts Eko's copy ships with (Sept 16 to Oct 1).
+- eko-backup-2026-10-16.json / eko-workouts-2026-10-16.csv: the Oct 16 phone backup (same 7 workouts).
 
 What is NOT here, because the app keeps logs on each phone:
-- Eko's workouts after Oct 1 (Oct 15, 22, 26 and on)
 - All of Ahmed's workouts
 - All of Shayan's workouts
 
