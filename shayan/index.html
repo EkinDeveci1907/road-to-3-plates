@@ -209,6 +209,10 @@ h1{font-size:30px;line-height:1.15;font-weight:700;letter-spacing:-.02em;margin:
 .bar{position:absolute;left:0;right:0;top:-1px;height:2px;background:var(--sf3);margin:0;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--ac);border-radius:2px;transition:width var(--slow) var(--ease)}
 .finish .btn{flex:0 0 auto;white-space:nowrap}
+.finish__meta .ok{display:flex;align-items:center;gap:6px;color:var(--tx);font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.finish__meta .ok svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.finish__meta .ok-sub{display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sum-btns .link{justify-self:center}
 .tabs{position:relative;flex:none;z-index:7;background:var(--bg);border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom,0px)}
 .tabs ul{list-style:none;margin:0 auto;padding:0;max-width:520px;display:grid;grid-template-columns:repeat(4,1fr);height:var(--tab)}
 .tabs button{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--tx3);font-size:10px;font-weight:600;border-radius:0}
@@ -493,7 +497,7 @@ function fmtRest(s){var m=Math.floor(s/60),x=s%60;return m?(x?m+':'+pad(x):m+':0
 function lbs(n){return Math.round(n).toLocaleString('en-CA')}
 var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:P+'.drafts',sessions:P+'.sessions',bw:P+'.bw',checks:P+'.checks',seeded:P+'.seeded',hint:P+'.hideInstall'};
-var APP_VERSION='4.7 (Oct 25)';
+var APP_VERSION='4.8 (Oct 27)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
@@ -803,7 +807,12 @@ function openHowTo(rex){
 }
 function closeSheet(){sheetEl.classList.remove('show');sheetBg.classList.remove('show');sheetEl.setAttribute('aria-hidden','true');}
 sheetBg.addEventListener('click',closeSheet);
-sheetEl.addEventListener('click',function(ev){if(ev.target.closest('[data-close]'))closeSheet();if(ev.target.closest('[data-act="confirmsave"]')){closeSheet();doSave();}});
+sheetEl.addEventListener('click',function(ev){if(ev.target.closest('[data-close]'))closeSheet();if(ev.target.closest('[data-act="confirmsave"]')){closeSheet();doSave();}
+  var rv=ev.target.closest('[data-act="revedit"]');if(rv){closeSheet();var cw=workout(S.activeKey),cd=draftFor(cw.key);
+    // The workout on screen is already this saved one: its sets below are the ones to edit
+    if(cd.saved&&cd.date+'-'+cw.key===rv.dataset.id)toast('Change any set below. Save changes shows up once something changes.');
+    else editSession(rv.dataset.id);}
+  if(ev.target.closest('[data-act="revagain"]')){closeSheet();startAgain();}});
 function sessionStats(sess){var sets=0,vol=0;(sess.exercises||[]).forEach(function(e){(e.sets||[]).forEach(function(x){sets++;if(x.w>0&&x.r>0)vol+=x.w*x.r;});});return {sets:sets,vol:vol};}
 function receipt(w,d){
   var sess=S.sessions.filter(function(s){return s.id===d.date+'-'+w.key})[0];if(!sess)return '';var st=sessionStats(sess);
@@ -813,14 +822,32 @@ function receipt(w,d){
 }
 function elapsed(d){var x=Math.max(0,Math.floor((Date.now()-d.startedAt)/1000)),hh=Math.floor(x/3600),mm=Math.floor(x%3600/60);return (hh?hh+':'+pad(mm):mm)+':'+pad(x%60);}
 var CLK=null;
+/* Is this workout already done? Either it was just saved (and not changed since),
+   or nothing has been started yet and the same workout was saved earlier this week (Mon to Sun). */
+function doneSession(w,d){
+  if(d.saved){if(hasChanges(w,d))return null;return S.sessions.filter(function(x){return x.id===d.date+'-'+w.key})[0]||null;}
+  if(d.startedAt||draftHasWork(d))return null;
+  var mon=ymd(mondayOf(parseYmd(d.date))),found=null;
+  S.sessions.forEach(function(s){if(s.key===w.key&&s.date>=mon&&s.date<=d.date&&(!found||s.date>found.date))found=s;});
+  return found;
+}
+function doneLabel(ds){
+  if(ds===todayStr())return 'Workout done for today';
+  var y=new Date();y.setDate(y.getDate()-1);
+  if(ds===ymd(y))return 'Workout done yesterday';
+  return 'Workout done '+fmt(ds,{weekday:'long'});
+}
 function updateFinish(){
   if(S.tab!=='today'||S.view){finishEl.classList.remove('show');document.body.classList.remove('has-finish');return;}
-  var w=workout(S.activeKey),d=draftFor(w.key),total=0,done=0;
-  if(d.saved&&!hasChanges(w,d)){finishEl.classList.remove('show');document.body.classList.remove('has-finish');return;}
+  var w=workout(S.activeKey),d=draftFor(w.key),total=0,done=0,fin=doneSession(w,d);
+  if(!fin&&d.saved&&!hasChanges(w,d)){finishEl.classList.remove('show');document.body.classList.remove('has-finish');return;}
   exList(w,d).forEach(function(r){exDraft(d,r).sets.forEach(function(s){total++;if(s.done)done++;});});
   finishEl.classList.add('show');document.body.classList.add('has-finish');
-  var bar='<div class="bar" aria-hidden="true"><i style="width:'+(total?done/total*100:0)+'%"></i></div>';
-  if(d.saved){finishMeta.innerHTML='<b>'+done+'</b> of '+total+' sets'+bar;finishBtn.textContent='Save changes';}
+  var bar='<div class="bar" aria-hidden="true"><i style="width:'+(fin?100:(total?done/total*100:0))+'%"></i></div>';
+  if(fin){var fst=sessionStats(fin);
+    finishMeta.innerHTML='<span class="ok">'+CHECK+esc(doneLabel(fin.date))+'</span><span class="ok-sub">'+fst.sets+(fst.sets===1?' set':' sets')+(fin.mins?' · '+fin.mins+' min':'')+(fin.prs?' · '+fin.prs+' new best'+(fin.prs>1?'s':''):'')+'</span>'+bar;
+    finishBtn.textContent='Review workout';}
+  else if(d.saved){finishMeta.innerHTML='<b>'+done+'</b> of '+total+' sets'+bar;finishBtn.textContent='Save changes';}
   else if(!d.startedAt){finishMeta.innerHTML='<b>'+total+'</b> sets planned'+bar;finishBtn.textContent='Start workout';}
   else{finishMeta.innerHTML='<b class="num" id="elapsed">'+elapsed(d)+'</b> \u00b7 '+done+' of '+total+' sets'+bar;finishBtn.textContent='End workout';}
   if(!CLK)CLK=setInterval(function(){if(S.tab!=='today')return;var dd=S.drafts[S.activeKey],el=document.getElementById('elapsed');if(dd&&dd.startedAt&&!dd.saved&&el)el.textContent=elapsed(dd);},1000);
@@ -1121,7 +1148,7 @@ main.addEventListener('click',function(ev){
     if(act==='del'){var id=b.dataset.id,gone=S.sessions.filter(function(x){return x.id===id})[0];S.sessions=S.sessions.filter(function(x){return x.id!==id});tombAdd(id);persist();keepScroll(renderHistory);syncCloud();toast('Workout deleted','Undo',function(){tombDel(id);gone.savedAt=Math.max(gone.savedAt||0,1);S.sessions.push(gone);persist();keepScroll(renderHistory);syncCloud();});return;}
   }
 });
-finishBtn.addEventListener('click',function(){var w=workout(S.activeKey),d=draftFor(w.key);if(!d.saved&&!d.startedAt){d.startedAt=Date.now();saveDrafts();updateFinish();toast('Workout started. Tap ✓ after each set.');return;}openSummary();});
+finishBtn.addEventListener('click',function(){var w=workout(S.activeKey),d=draftFor(w.key),fin=doneSession(w,d);if(fin){openReview(fin);return;}if(!d.saved&&!d.startedAt){d.startedAt=Date.now();saveDrafts();updateFinish();toast('Workout started. Tap ✓ after each set.');return;}openSummary();});
 document.getElementById('restoreIn').addEventListener('change',function(ev){var f=ev.target.files&&ev.target.files[0];if(!f)return;var rd=new FileReader();
   rd.onload=function(){try{var o=JSON.parse(rd.result);if(!o||o.app!=='road-to-235'||!Array.isArray(o.sessions))throw 0;var byId={},added=0;S.sessions.forEach(function(s){byId[s.id]=s});
       // Only take a workout from the backup if this phone doesn't have it, or the backup's copy was saved later
@@ -1168,6 +1195,17 @@ function openSummary(){
   h+='<div class="sum-btns"><button type="button" class="btn" data-act="confirmsave">'+(edit?'Save changes':prior?'Replace it':'Save workout')+'</button><button type="button" class="btn btn--ghost" data-close>'+(edit?'Keep editing':'Keep going')+'</button></div></div>';
   sheetIn.innerHTML=h;sheetEl.scrollTop=0;sheetEl.classList.add('show');sheetBg.classList.add('show');sheetEl.setAttribute('aria-hidden','false');
 }
+/* Read-only look at a finished workout, from the Review workout button */
+function openReview(s){
+  var w=workout(s.key),d=draftFor(w.key),st=sessionStats(s),again=!d.saved&&s.date!==d.date;
+  var h='<div class="receipt"><h2 id="sheet-h">'+esc(w.name)+' done</h2><p class="eyebrow">'+esc(fmt(s.date,{weekday:'long',month:'short',day:'numeric'}))+'</p>';
+  h+='<dl><dt>Time</dt><dd class="num">'+(s.mins?s.mins+' min':'–')+'</dd><dt>Sets</dt><dd class="num">'+st.sets+'</dd><dt>Weight moved</dt><dd class="num">'+lbs(st.vol)+' lbs</dd><dt>New bests</dt><dd class="num">'+(s.prs||0)+'</dd></dl>';
+  h+='<ul class="sum">';(s.exercises||[]).forEach(function(e){var t=setsText(e.sets,isBwName(e.name));
+    h+='<li><b>'+esc(e.name)+'</b><span class="num">'+(t?esc(t):'not logged')+'</span>'+(e.note?'<span>“'+esc(e.note)+'”</span>':'')+'</li>';});h+='</ul>';
+  h+='<div class="sum-btns"><button type="button" class="btn" data-close>Close</button><button type="button" class="btn btn--ghost" data-act="revedit" data-id="'+esc(s.id)+'">Edit sets</button>'+(again?'<button type="button" class="link" data-act="revagain">Do it again today</button>':'')+'</div></div>';
+  sheetIn.innerHTML=h;sheetEl.scrollTop=0;sheetEl.classList.add('show');sheetBg.classList.add('show');sheetEl.setAttribute('aria-hidden','false');
+}
+function startAgain(){var w=workout(S.activeKey),d=draftFor(w.key);if(!d.saved&&!d.startedAt){d.startedAt=Date.now();saveDrafts();}updateFinish();toast('Workout started. Tap ✓ after each set.');}
 function doSave(){
   var w=workout(S.activeKey),d=draftFor(w.key),ds=draftSession(w,d),exs=ds.exs,prs=ds.prs;
   if(!ds.any){toast('Log at least one set first. Tap the check next to a set.');return;}
