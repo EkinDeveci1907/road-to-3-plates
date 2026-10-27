@@ -42,8 +42,6 @@ rep_re(r"var P;var CFG=\{owner:'Eko'.*?\};\n",
 
 # ---- Eko's own history and starting weights stay out of a friend's build ----
 rep_re(r"var START_W=\{.*?\};\nvar OLD_LOGS=\[\n.*?\n\];\n", "var START_W={};\nvar OLD_LOGS=[];\n")
-rep(",hint:'Start with the 60 lb dumbbells and keep your form clean.'}", "}")
-rep(",hint:'Start at +30 lbs.'}", "}")
 rep("'Horizontal calf raise'", "'Horizontal calf raise'")  # sanity: media table is shared and unchanged
 
 # ---- his own file names ----
