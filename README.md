@@ -22,7 +22,7 @@ The wide-grip set is always the last bench set: lighter, 10–12 reps. Lower A u
 - "Last time" shows the most recent time you did that exercise, any day. Bench rows show every bench set from that day.
 
 ## Today tab
-- Opens on the workout you're in the middle of, else today's, else the next one this week you haven't done (a missed day stays open until Sunday). Rest days say what's next.
+- All seven days across the top, opens on today. Tue, Sat and Sun are rest days: a rest page (eat, sleep, chill) that says what's next, offers "Train anyway", and keeps a missed day open until Sunday ("Do Lower B today").
 - Mon/Wed/Thu/Fri dots fill in as the week goes. Swipe left or right to move between days.
 - A finished exercise folds to one line. Once a workout is saved the bar says "Workout done" with a Review button.
 - Rest timer: beeps (also with the iPhone on silent), vibrates, and highlights the next set.

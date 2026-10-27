@@ -196,6 +196,17 @@ h1{font-size:30px;line-height:1.15;font-weight:700;letter-spacing:-.02em;margin:
 .saved__t svg{flex:none;width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
 .saved .link{min-height:36px;padding:0 8px}
 .rest{margin:8px 0 0;font-size:13px;color:var(--tx3);font-weight:500}
+.seg--days{padding:3px;margin:16px 0 14px}
+.seg--days button{padding:7px 0;min-height:44px;font-size:12px;letter-spacing:-.01em}
+.seg--days button small{font-size:10px;margin-top:1px}
+.restcard{background:var(--sf);border:1px solid var(--ln);border-radius:var(--r);padding:22px 20px 20px;margin-top:4px;text-align:center}
+.restcard h2{margin:16px 0 6px;font-size:18px;letter-spacing:-.01em}
+.restcard p{margin:0;color:var(--tx2);font-size:14px;line-height:1.5}
+.restcard .actions-row{justify-content:center}
+.rest-art{display:flex;justify-content:center;gap:22px;margin:6px 0 2px}
+.rest-art figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.rest-art svg{width:54px;height:54px;fill:none;stroke:var(--tx);stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.rest-art figcaption{font-size:11px;font-weight:600;color:var(--tx3);letter-spacing:.04em;text-transform:uppercase}
 .wkrow{display:flex;align-items:center;gap:6px;margin:-6px 0 12px;font-size:12px;color:var(--tx3)}
 .wkrow__d{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;background:var(--sf);border:1px solid var(--ln);font-weight:600;color:var(--tx3)}
 .wkrow__d i{width:7px;height:7px;border-radius:50%;background:var(--sf3);display:block;box-sizing:border-box}
@@ -509,6 +520,8 @@ var WORKOUTS=[
    {name:'Cable crunch',sets:3,reps:'12–15',rest:60,hint:'V-bar. Round your back and crunch your ribs toward your hips.'}]}
 ];
 var SCHED={1:'upperA',3:'lowerA',4:'upperB',5:'lowerB'},CODE={upperA:'Up A',lowerA:'Lo A',upperB:'Up B',lowerB:'Lo B'},DAYNAME={Mon:'Monday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday'};
+/* The seven days across the top of Today, Monday first. Tue, Sat and Sun are rest days. */
+var DAYS=[1,2,3,4,5,6,0],DSHORT={0:'Sun',1:'Mon',2:'Tue',3:'Wed',4:'Thu',5:'Fri',6:'Sat'},DLONG={0:'Sunday',1:'Monday',2:'Tuesday',3:'Wednesday',4:'Thursday',5:'Friday',6:'Saturday'},DNUM={Mon:1,Wed:3,Thu:4,Fri:5};
 var ALIASES={'Bench press – top set':['Bench press'],'Bench press – heavy set':['Bench press'],'DB shoulder press':['Shoulder press'],'Bench press – back-off sets':['Bench press'],'Bench press – volume':['Bench press'],'Squat – top set':['Squat'],'Squat – back-off sets':['Squat'],
  'Lat pulldown':['Lat pull down'],'Seated leg curl':['Leg curl'],'Leg curl':['Seated leg curl'],'Weighted dips':['Dips'],'Leg press':['Leg press / Bulgarian split squat'],
  'Barbell / EZ-bar curl':['Barbell curl'],'Close-grip seated cable row':['Chest-supported / machine row','Machine row','Seated cable row'],'Standing calf raise':['Calf raises'],'Chest fly machine':['Cable fly'],'Cable fly':['Chest fly machine'],'Back extension (hyperextension)':['Back extension']};
@@ -539,7 +552,7 @@ function fmtRest(s){var m=Math.floor(s/60),x=s%60;return m?(x?m+':'+pad(x):m+':0
 function lbs(n){return Math.round(n).toLocaleString('en-CA')}
 var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:P+'.drafts',sessions:P+'.sessions',bw:P+'.bw',checks:P+'.checks',seeded:P+'.seeded',hint:P+'.hideInstall'};
-var APP_VERSION='4.9 (Oct 27)';
+var APP_VERSION='5.0 (Oct 27)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
@@ -708,22 +721,33 @@ seedOnce();
 var S={tab:'today',sessions:LS.get(K.sessions,[]),bw:LS.get(K.bw,[]),checks:LS.get(K.checks,{}),drafts:LS.get(K.drafts,{}),activeKey:null,openEx:{},openHist:{},swapOpen:null,addOpen:false,prFlash:null,view:null,progView:'bench'};
 /* Was this workout saved this week (Monday to today)? */
 function doneThisWeek(key,t){var mon=ymd(mondayOf(parseYmd(t)));return S.sessions.some(function(s){return s.key===key&&s.date>=mon&&s.date<=t});}
-/* Which workout Today opens on: one you're in the middle of, else today's if it isn't done yet,
-   else the next one this week you haven't done. Rest day: the next one coming up. Week all done: today's. */
-function defaultKey(){
-  var t=todayStr(),now=new Date(),k;
-  for(k in S.drafts){var d=S.drafts[k];if(d&&d.date===t&&!d.saved&&(d.startedAt||draftHasWork(d))&&workout(k).key===k)return k;}
-  var today=SCHED[now.getDay()];
-  if(today&&!doneThisWeek(today,t))return today;
+/* A workout you started today and haven't saved */
+function inProgressKey(){var t=todayStr();for(var k in S.drafts){var d=S.drafts[k];if(d&&d.date===t&&!d.saved&&(d.startedAt||draftHasWork(d))&&workout(k).key===k)return k;}return null;}
+/* The next workout to do: later this week and not done yet, else one missed earlier this week, else null (week done) */
+function nextUp(){
+  var t=todayStr(),now=new Date();
   for(var i=1;i<7;i++){var dd=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i);if(dd.getDay()===1)break;var nk=SCHED[dd.getDay()];if(nk&&!doneThisWeek(nk,t))return nk;}
-  for(var j=0;j<WORKOUTS.length;j++)if(!doneThisWeek(WORKOUTS[j].key,t))return WORKOUTS[j].key;   // missed earlier this week, still open
-  return today||'upperA';
+  for(var j=0;j<WORKOUTS.length;j++)if(!doneThisWeek(WORKOUTS[j].key,t))return WORKOUTS[j].key;
+  return null;
 }
+/* Which workout Today opens on: one you're in the middle of, else today's. On a rest day the rest page
+   shows instead (S.restDay), and this is the workout "Train anyway" would open. */
+function defaultKey(){
+  var k=inProgressKey();if(k)return k;
+  var today=SCHED[new Date().getDay()];if(today)return today;
+  return nextUp()||'upperA';
+}
+function defaultRest(){if(inProgressKey())return null;var d=new Date().getDay();return SCHED[d]?null:d;}
+/* The day shown across the top: the rest day you're looking at, or the day of the workout on screen */
+function curDay(){return S.restDay!=null?S.restDay:DNUM[workout(S.activeKey).day];}
+function setDay(dn){S.swapOpen=null;S.addOpen=false;if(SCHED[dn]){S.restDay=null;S.activeKey=SCHED[dn];}else S.restDay=dn;}
+/* The date this weekday falls on in the current Monday-to-Sunday week */
+function dateOfDay(dn){var m=mondayOf(new Date());m.setDate(m.getDate()+(dn+6)%7);return m;}
 /* Has this workout's day already gone by this week? */
 function dayPassed(w){var now=new Date();for(var i=1;i<7;i++){var dd=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);if(dd.getDay()===0)break;if(SCHED[dd.getDay()]===w.key)return true;}return false;}
 /* "tomorrow", or the day's name, for the next time this workout comes up */
 function dayWord(w){var now=new Date();for(var i=0;i<8;i++){var dd=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i);if(SCHED[dd.getDay()]===w.key)return i===0?'today':i===1?'tomorrow':DAYNAME[w.day];}return DAYNAME[w.day];}
-S.activeKey=defaultKey();
+S.activeKey=defaultKey();S.restDay=defaultRest();
 function workout(k){for(var i=0;i<WORKOUTS.length;i++)if(WORKOUTS[i].key===k)return WORKOUTS[i];return WORKOUTS[0]}
 /* Has anything been typed or checked in this draft? */
 function draftHasWork(d){
@@ -805,7 +829,7 @@ function videoLink(rex){
 var SC=document.getElementById('scroller'),main=document.getElementById('main'),ghost=document.getElementById('ghost'),weeksEl=document.getElementById('weeks'),sheetEl=document.getElementById('sheet'),sheetBg=document.getElementById('sheetBg'),sheetIn=document.getElementById('sheetIn'),finishEl=document.getElementById('finish'),finishMeta=document.getElementById('finishMeta'),finishBtn=document.getElementById('finishBtn');
 var CHECK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>', CHEV='<svg class="ex__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 function renderWeeks(ds){var wi=weekIndex(ds);weeksEl.textContent=(wi>=0&&wi<=10)?'Week '+(wi+1)+' of 11':'';}
-function segHtml(items,cur,attr){var idx=0;items.forEach(function(x,i){if(x[0]===cur)idx=i;});return '<div class="seg" role="group" style="--n:'+items.length+'"><span class="seg__thumb" style="transform:translateX('+(idx*100)+'%)" aria-hidden="true"></span>'+items.map(function(x){return '<button type="button" '+attr+'="'+x[0]+'" aria-pressed="'+(x[0]===cur)+'">'+esc(x[1])+(x[2]?'<small>'+esc(x[2])+'</small>':'')+'</button>'}).join('')+'</div>';}
+function segHtml(items,cur,attr,cls){var idx=0;items.forEach(function(x,i){if(x[0]===cur)idx=i;});return '<div class="seg'+(cls?' '+cls:'')+'" role="group" style="--n:'+items.length+'"><span class="seg__thumb" style="transform:translateX('+(idx*100)+'%)" aria-hidden="true"></span>'+items.map(function(x){return '<button type="button" '+attr+'="'+x[0]+'" aria-pressed="'+(x[0]===cur)+'">'+esc(x[1])+(x[2]?'<small>'+esc(x[2])+'</small>':'')+'</button>'}).join('')+'</div>';}
 function slideSeg(b,fn){var th=b.parentNode.querySelector('.seg__thumb'),idx=Array.prototype.indexOf.call(b.parentNode.querySelectorAll('button'),b);if(th&&!reduced){th.style.transform='translateX('+(idx*100)+'%)';setTimeout(function(){keepScroll(fn)},160);}else keepScroll(fn);}
 function lastBlock(rex,before){
   var last=lastDone(rex,before),rec=recommend(rex,before),h='';
@@ -838,16 +862,42 @@ function setRows(rex,e,before,idx){
   h+='<label class="sr" for="note-'+idx+'">Note for '+nm+'</label><input class="field" id="note-'+idx+'" data-f="note" placeholder="Note for next time" value="'+esc(e.note)+'" style="margin-top:12px">';
   return h;
 }
+function tipHtml(){
+  var standalone=window.navigator.standalone===true||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches);
+  if(!standalone&&/iPhone|iPad|iPod/.test(navigator.userAgent)&&!LS.get(K.hint,false))return '<div class="tip"><p>Tap Share, then <b>Add to Home Screen</b>. Open it from that icon and it runs full screen, with no Safari bar.</p><button type="button" data-act="hidehint" aria-label="Dismiss tip">×</button></div>';
+  return '';
+}
+function daySeg(){return segHtml(DAYS.map(function(dn){var k=SCHED[dn];return [String(dn),DSHORT[dn],k?CODE[k]:'rest']}),String(curDay()),'data-day','seg--days');}
+/* White line drawings: eat, sleep, chill */
+var REST_ART='<div class="rest-art" aria-hidden="true">'+
+  '<figure><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="12"/><circle cx="24" cy="24" r="6"/><path d="M7 8v8a3 3 0 0 0 6 0V8M10 8v32M41 40V8c-3 3-4 9-3 15l3 3"/></svg><figcaption>Eat</figcaption></figure>'+
+  '<figure><svg viewBox="0 0 48 48"><path d="M29 7a15 15 0 1 0 12 24A13 13 0 0 1 29 7z"/><path d="M6 9h7l-7 7h7M15 20h5l-5 5h5"/></svg><figcaption>Sleep</figcaption></figure>'+
+  '<figure><svg viewBox="0 0 48 48"><path d="M9 21v-6a3 3 0 0 1 3-3h24a3 3 0 0 1 3 3v6"/><rect x="4" y="21" width="40" height="12" rx="3"/><path d="M24 21v12M9 33v5M39 33v5"/></svg><figcaption>Chill</figcaption></figure></div>';
+function renderRest(){
+  var dn=S.restDay,now=new Date(),isToday=dn===now.getDay(),date=dateOfDay(dn),t=todayStr();renderWeeks(t);
+  var h='<div class="enter">'+tipHtml();
+  h+='<p class="date">'+esc(date.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'}))+'</p><h1>Rest day</h1><p class="about">Eat, sleep, chill.</p>';
+  h+=daySeg()+weekRow();
+  var nk=nextUp(),nw=nk?workout(nk):null,missed=nw&&dayPassed(nw)&&!doneThisWeek(nk,t),line,btn;
+  if(!nw){line='All '+WORKOUTS.length+' workouts done this week. Upper A is '+dayWord(WORKOUTS[0])+'.';btn='';}
+  else if(missed){line=nw.name+' was '+DAYNAME[nw.day]+' and isn’t logged yet. Still time to get it in.';btn='Do '+nw.name+' today';}
+  else{line='Next up: '+nw.name+' '+dayWord(nw)+'.';btn='Train anyway';}
+  h+='<section class="restcard">'+REST_ART+'<h2>'+(isToday?'Nothing to lift today':'Nothing to lift on '+DLONG[dn])+'</h2>'+
+    '<p>Muscle is built on the days you don’t train. Eat big, get 8 hours of sleep, and take it easy. Hit your protein and get to bed early.</p>'+
+    '<p class="fine" style="margin-top:10px">'+esc(line)+'</p>'+(btn&&isToday?'<div class="actions-row"><button type="button" class="btn btn--ghost" data-act="trainanyway" data-wk="'+esc(nk)+'">'+esc(btn)+'</button></div>':'')+'</section>';
+  if(isToday){var day=S.checks[t]||{},lb=latestBw(),n=nutrition(lb?lb.lbs:BWG-15);
+    h+='<section class="card" aria-labelledby="rp-h"><h2 id="rp-h" class="eyebrow">Protein today</h2><div class="big"><span class="w num">'+(day.protein||0)+'</span><span>of '+n.p+' g</span></div><div class="actions-row"><button type="button" class="btn btn--ghost" data-act="gofood">Log food</button></div></section>';}
+  main.innerHTML=h+'</div>';updateFinish();
+}
 function renderToday(){
+  if(S.restDay!=null){renderRest();return;}
   var w=workout(S.activeKey),d=draftFor(w.key),wi=weekIndex(d.date),rw=roadWeek(wi);renderWeeks(d.date);
   var list=exList(w,d),drafts=list.map(function(r){return exDraft(d,r)});
   if(S.openEx[w.key]==null){var k=-1;for(var i=0;i<list.length;i++){if(!drafts[i].sets.every(function(s){return s.done})){k=i;break;}}S.openEx[w.key]=k;}
-  var h='<div class="enter">';
-  var standalone=window.navigator.standalone===true||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches);
-  if(!standalone&&/iPhone|iPad|iPod/.test(navigator.userAgent)&&!LS.get(K.hint,false))h+='<div class="tip"><p>Tap Share, then <b>Add to Home Screen</b>. Open it from that icon and it runs full screen, with no Safari bar.</p><button type="button" data-act="hidehint" aria-label="Dismiss tip">×</button></div>';
+  var h='<div class="enter">'+tipHtml();
   h+='<p class="date">'+esc(parseYmd(d.date).toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'}))+'</p><h1>'+esc(w.name)+'</h1><p class="about">'+esc(w.about)+(rw&&rw.deload?' · Deload week':'')+'</p>';
   h+=restLine(w,d);
-  h+=segHtml(WORKOUTS.map(function(x){return [x.key,x.name,x.day]}),w.key,'data-key');
+  h+=daySeg();
   h+=weekRow();
   if(d.saved)h+=receipt(w,d);
   h+='<ul class="list" aria-label="Exercises" style="list-style:none;padding:0">';
@@ -925,7 +975,7 @@ function doneLabel(ds){
   return 'Workout done '+fmt(ds,{weekday:'long'});
 }
 function updateFinish(){
-  if(S.tab!=='today'||S.view){finishEl.classList.remove('show');document.body.classList.remove('has-finish');return;}
+  if(S.tab!=='today'||S.view||S.restDay!=null){finishEl.classList.remove('show');document.body.classList.remove('has-finish');return;}
   var w=workout(S.activeKey),d=draftFor(w.key),total=0,done=0,fin=doneSession(w,d);
   if(!fin&&d.saved&&!hasChanges(w,d)){finishEl.classList.remove('show');document.body.classList.remove('has-finish');return;}
   exList(w,d).forEach(function(r){exDraft(d,r).sets.forEach(function(s){total++;if(s.done)done++;});});
@@ -1139,7 +1189,7 @@ function dayDetail(ds,ses){
   return h+'</section>';
 }
 function openWorkout(key,date,start){
-  S.activeKey=key;var d=draftFor(key),w=workout(key);
+  S.activeKey=key;S.restDay=null;var d=draftFor(key),w=workout(key);
   if(date&&d.date!==date){
     if(hasUnsaved(w,d)){
       S.openEx={};S.tab='today';render();SC.scrollTop=0;
@@ -1161,7 +1211,7 @@ function editSession(id){
     var sets=(e.sets||[]).map(function(x){return {w:x.w==null?'':String(x.w),r:x.r==null?'':String(x.r),done:true};});
     if(r)d.ex[r.key]={sets:sets.length?sets:[{w:'',r:'',done:false}],note:e.note||''};
     else{d.extra.push({name:e.name,sets:Math.max(1,sets.length),reps:'8\u201312',rest:90});d.ex['extra:'+(d.extra.length-1)]={sets:sets.length?sets:[{w:'',r:'',done:false}],note:e.note||''};}});
-  d.snap=sessSig(d.date,draftSession(w,d).exs);S.drafts[w.key]=d;saveDrafts();S.activeKey=w.key;S.openEx={};S.tab='today';render();SC.scrollTop=0;
+  d.snap=sessSig(d.date,draftSession(w,d).exs);S.drafts[w.key]=d;saveDrafts();S.activeKey=w.key;S.restDay=null;S.openEx={};S.tab='today';render();SC.scrollTop=0;
   toast('Editing '+w.name+' from '+fmt(s.date)+'. Change anything and Save changes shows up.');
 }
 function render(){if(CFG.setup&&!PROF){renderSetup();return;}document.body.classList.remove('setup');var v=S.view||S.tab;document.body.classList.toggle('in-settings',v==='settings');document.querySelectorAll('.tabs button').forEach(function(b){if(b.dataset.tab===S.tab&&!S.view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});({today:renderToday,progress:renderProgress,history:renderHistory,food:renderFood,settings:renderSettings})[v]();if(v!=='today')updateFinish();countUp();}
@@ -1249,9 +1299,9 @@ main.addEventListener('touchstart',function(ev){
 main.addEventListener('touchend',function(ev){
   if(!SW.on)return;SW.on=false;var p=ev.changedTouches[0],dx=p.clientX-SW.x,dy=p.clientY-SW.y;
   if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.6||Date.now()-SW.t>700)return;
-  var idx=-1;WORKOUTS.forEach(function(x,i){if(x.key===S.activeKey)idx=i});var ni=idx+(dx<0?1:-1);
-  if(ni<0||ni>=WORKOUTS.length)return;
-  S.activeKey=WORKOUTS[ni].key;S.swapOpen=null;S.addOpen=false;swapView(dx<0?'l':'r',renderToday);
+  var idx=DAYS.indexOf(curDay()),ni=idx+(dx<0?1:-1);
+  if(ni<0||ni>=DAYS.length)return;
+  setDay(DAYS[ni]);swapView(dx<0?'l':'r',renderToday);
 },{passive:true});
 main.addEventListener('change',function(ev){var el=ev.target;if(S.tab==='today'&&el.dataset.f==='date'){S.openEx={};keepScroll(renderToday);return;}if(S.tab==='food'&&el.dataset.supp){setChecks(function(day){day[el.dataset.supp]=el.checked});}});
 main.addEventListener('keydown',function(ev){if(ev.key!=='Enter')return;if(ev.target.id==='swapIn'){ev.preventDefault();var b=main.querySelector('[data-act="swapgo"]');if(b)b.click();}if(ev.target.id==='addIn'){ev.preventDefault();var b2=main.querySelector('[data-act="addgo"]');if(b2)b2.click();}});
@@ -1259,7 +1309,9 @@ main.addEventListener('click',function(ev){
   var b=ev.target.closest('button');if(!b)return;var act=b.dataset.act;
   if(b.dataset.nav==='back'){closeSettings();return;}
   if(act==='setup-go'){saveProfile(true);return;}if(act==='pf-edit'){S.profOpen=true;keepScroll(render);refocus('#pf-b');return;}if(act==='pf-cancel'){S.profOpen=false;keepScroll(render);return;}if(act==='pf-save'){saveProfile(false);return;}
-  if(b.dataset.key){if(b.dataset.key===S.activeKey)return;S.activeKey=b.dataset.key;S.swapOpen=null;S.addOpen=false;slideSeg(b,renderToday);return;}
+  if(b.dataset.day!=null){var dn=+b.dataset.day;if(dn===curDay())return;setDay(dn);slideSeg(b,renderToday);return;}
+  if(act==='trainanyway'){S.restDay=null;S.activeKey=b.dataset.wk||defaultKey();S.openEx={};swapView('l',renderToday);return;}
+  if(act==='gofood'){S.tab='food';swapView('l',render);return;}
   if(b.dataset.pv){if(b.dataset.pv===S.progView)return;S.progView=b.dataset.pv;slideSeg(b,renderProgress);return;}
   if(act==='cloudshow'){S.cloudOpen=true;keepScroll(render);refocus('#cloudIn');return;}if(act==='cloudon'){cloudConnect();return;}if(act==='cloudoff'){LS.set(P+'.cloudUrl','');CLD.err='';keepScroll(render);toast('Sync turned off. Your workouts stay on this phone.');return;}if(act==='cloudsync'){syncCloud(true);return;}
   if(act==='backup'){

@@ -1,5 +1,5 @@
 // Shayan's 3 Plates, offline support. Change VERSION whenever index.html changes.
-const VERSION = 'shy-v12';
+const VERSION = 'shy-v13';
 const OWN = 'shy-'; // only ever clean up this app's own caches: the other builds share this origin
 const HOME = new URL('./', self.location).pathname; // this app's own folder
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
