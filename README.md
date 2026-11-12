@@ -9,6 +9,7 @@ Logs are saved on the phone. Settings (gear) → Back up now keeps a copy; `back
 - Me: https://ekindeveci1907.github.io/road-to-3-plates/
 - Ahmed: https://ekindeveci1907.github.io/Ahmed/ (repo `ahmed`; old link `3-plates` just points there)
 - Shayan: https://ekindeveci1907.github.io/road-to-3-plates/shayan/ (folder `shayan/` in this repo)
+- Pavle: https://ekindeveci1907.github.io/road-to-3-plates/pavle/ (folder `pavle/` in this repo)
 
 ## The plan (v4.9)
 Mon Upper A, Wed Lower A, Thu Upper B, Fri Lower B. Big compound lifts get 2–3 hard sets of 6–8; isolation work gets 3 sets.
@@ -25,7 +26,7 @@ The wide-grip set is always the last bench set: lighter, 10–12 reps. Lower A u
 - All seven days across the top, opens on today. Tue, Sat and Sun are rest days: a rest page (eat, sleep, chill) that says what's next, offers "Train anyway", and keeps a missed day open until Sunday ("Do Lower B today").
 - Mon/Wed/Thu/Fri dots fill in as the week goes. Swipe left or right to move between days.
 - A finished exercise folds to one line. Once a workout is saved the bar says "Workout done" with a Review button.
-- Rest timer: beeps (also with the iPhone on silent), vibrates, and highlights the next set.
+- Rest timer: silent. When rest is over it shows "Go" and highlights the next set (no beep).
 - Progress: weight-gain pace from weekly weigh-in averages, and a 315 countdown from the heavy-bench chain.
 
 ## Updating
@@ -34,3 +35,4 @@ Edit `index.html`, bump `VERSION` in `sw.js`, then rebuild the friends' copies (
     python3 tools/make-friend.py Ahmed  tpf ahm ../ahmed/index.html ../ahmed/sw.js ../ahmed/manifest.webmanifest --old-link
     python3 tools/make-friend.py Ahmed  tpf tpf ../3-plates/index.html ../3-plates/sw.js ../3-plates/manifest.webmanifest --old-link
     python3 tools/make-friend.py Shayan shy shy shayan/index.html shayan/sw.js shayan/manifest.webmanifest
+    python3 tools/make-friend.py Pavle  pav pav pavle/index.html pavle/sw.js pavle/manifest.webmanifest

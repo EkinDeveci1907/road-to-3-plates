@@ -552,7 +552,7 @@ function fmtRest(s){var m=Math.floor(s/60),x=s%60;return m?(x?m+':'+pad(x):m+':0
 function lbs(n){return Math.round(n).toLocaleString('en-CA')}
 var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:P+'.drafts',sessions:P+'.sessions',bw:P+'.bw',checks:P+'.checks',seeded:P+'.seeded',hint:P+'.hideInstall'};
-var APP_VERSION='5.0 (Oct 27)';
+var APP_VERSION='5.1 (Nov 12)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
@@ -744,7 +744,9 @@ function setDay(dn){S.swapOpen=null;S.addOpen=false;if(SCHED[dn]){S.restDay=null
 /* The date this weekday falls on in the current Monday-to-Sunday week */
 function dateOfDay(dn){var m=mondayOf(new Date());m.setDate(m.getDate()+(dn+6)%7);return m;}
 /* Has this workout's day already gone by this week? */
-function dayPassed(w){var now=new Date();for(var i=1;i<7;i++){var dd=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);if(dd.getDay()===0)break;if(SCHED[dd.getDay()]===w.key)return true;}return false;}
+/* The day you started using the app: set at setup, else your first log. Days before it are never "missed". */
+function joinedStr(){if(PROF&&PROF.joined)return PROF.joined;var a=S.sessions.map(function(x){return x.date}).concat(S.bw.map(function(x){return x.date}));if(CFG.start)a.push(ymd(new Date(CFG.start[0],CFG.start[1],CFG.start[2])));a=a.filter(Boolean).sort();return a.length?a[0]:todayStr();}
+function dayPassed(w){var now=new Date(),j=joinedStr();for(var i=1;i<7;i++){var dd=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);if(dd.getDay()===0)break;if(SCHED[dd.getDay()]===w.key)return ymd(dd)>=j;}return false;}
 /* "tomorrow", or the day's name, for the next time this workout comes up */
 function dayWord(w){var now=new Date();for(var i=0;i<8;i++){var dd=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i);if(SCHED[dd.getDay()]===w.key)return i===0?'today':i===1?'tomorrow':DAYNAME[w.day];}return DAYNAME[w.day];}
 S.activeKey=defaultKey();S.restDay=defaultRest();
@@ -1110,15 +1112,15 @@ function renderFood(){
   h+='<section class="card" aria-labelledby="ez-h"><h2 id="ez-h">Easy calories</h2><ul class="tips"><li>Shake: whey + 2% milk + 2 tbsp peanut butter ≈ 430 cal, 39 g protein.</li><li>Extra rice or pita at dinner. Olive oil on rice and pasta.</li><li>Eating out: a chicken döner plate with rice is a solid lunch.</li></ul></section></div>';main.innerHTML=h;
 }
 function renderHistory(){
-  renderWeeks(todayStr());var t0=todayStr(),all=sorted(),byDate={};all.forEach(function(s){(byDate[s.date]=byDate[s.date]||[]).push(s);});
+  renderWeeks(todayStr());var t0=todayStr(),j0=joinedStr(),all=sorted(),byDate={};all.forEach(function(s){(byDate[s.date]=byDate[s.date]||[]).push(s);});
   if(!S.calSel)S.calSel=t0;var sel=parseYmd(S.calSel);if(!S.calMonth)S.calMonth=new Date(sel.getFullYear(),sel.getMonth(),1);
   var y=S.calMonth.getFullYear(),mo=S.calMonth.getMonth(),first=new Date(y,mo,1),offset=(first.getDay()+6)%7,dim=new Date(y,mo+1,0).getDate(),cells=Math.ceil((offset+dim)/7)*7;
   var h='<div class="enter"><div class="pagehead pagehead--row"><div><h1>Calendar</h1><p class="about">'+all.length+' workout'+(all.length===1?'':'s')+' logged</p></div>'+(all.length?'<button type="button" class="pill" data-act="csv">Export CSV</button>':'')+'</div>';
   h+='<div class="calhead"><button type="button" data-act="moprev" aria-label="Previous month">\u2039</button><b aria-live="polite">'+esc(first.toLocaleDateString('en-CA',{month:'long',year:'numeric'}))+'</b><button type="button" data-act="monext" aria-label="Next month">\u203a</button></div>';
   h+='<div class="calgrid" role="group" aria-label="Days">'+['M','T','W','T','F','S','S'].map(function(x){return '<span class="dow" aria-hidden="true">'+x+'</span>'}).join('');
   for(var i=0;i<cells;i++){var d=new Date(y,mo,1-offset+i),ds=ymd(d),ses=byDate[ds]||[],key=SCHED[d.getDay()];
-    var st=ses.length?'done':key?(ds>=t0?'plan':'miss'):'',code=ses.length?(CODE[ses[0].key]||'\u2713'):(key&&ds>=t0?CODE[key]:'');
-    var lab=d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'})+(ses.length?', '+ses.map(function(x){return x.title}).join(' and ')+' done':key?', '+workout(key).name+(ds>=t0?' planned':' planned, not logged'):', rest day');
+    var st=ses.length?'done':key?(ds>=t0?'plan':ds>=j0?'miss':''):'',code=ses.length?(CODE[ses[0].key]||'\u2713'):(key&&ds>=t0?CODE[key]:'');
+    var lab=d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'})+(ses.length?', '+ses.map(function(x){return x.title}).join(' and ')+' done':key?', '+workout(key).name+(ds>=t0?' planned':ds>=j0?' planned, not logged':', before you started'):', rest day');
     h+='<button type="button" class="cday'+(d.getMonth()!==mo?' out':'')+(ds===t0?' today':'')+'" data-act="day" data-date="'+ds+'" aria-pressed="'+(ds===S.calSel)+'" aria-label="'+esc(lab)+'"><span class="n" aria-hidden="true">'+d.getDate()+'</span>'+(st?'<i class="m '+st+'" aria-hidden="true"></i>':'<i class="m" aria-hidden="true"></i>')+'<span class="c" aria-hidden="true">'+esc(code)+'</span></button>';}
   h+='</div><div class="legend" aria-hidden="true"><span><i class="m done"></i>Done</span><span><i class="m plan"></i>Planned</span><span><i class="m miss"></i>Missed</span></div>';
   h+=dayDetail(S.calSel,byDate[S.calSel]||[]);
@@ -1150,7 +1152,7 @@ function readProfile(full){function v(id){var el=document.getElementById(id);if(
   if(PROF&&PROF.start&&!changed)prof.start=PROF.start;else if(changed||!CFG.start)prof.start=thisMon;
   if(changed&&!full)prof.setAt=todayStr();else if(PROF&&PROF.setAt)prof.setAt=PROF.setAt;
   return {prof:prof,bw:w,changed:changed};}
-function saveProfile(full){var r=readProfile(full);if(!r)return;LS.set(P+'.profile',r.prof);
+function saveProfile(full){var r=readProfile(full);if(!r)return;if(PROF&&PROF.joined)r.prof.joined=PROF.joined;else if(full)r.prof.joined=todayStr();LS.set(P+'.profile',r.prof);
   if(r.bw){var t=todayStr();S.bw=S.bw.filter(function(x){return x.date!==t}).concat([{date:t,lbs:r.bw}]);persist();}
   toast(full?'You’re set. Let’s go.':r.changed?'Saved. The block restarts this week from your new numbers.':'Numbers saved');setTimeout(function(){location.reload()},r.changed&&!full?1400:500);}
 function profileCard(){
@@ -1247,29 +1249,15 @@ function toast(m,action,fn,ms){toastMsg.textContent=m;toastFn=fn||null;if(action
 toastAct.addEventListener('click',function(){var f=toastFn;toastEl.classList.remove('show');toastFn=null;if(f)f();});
 
 /* ================= rest timer ================= */
-var T={end:0,total:0,iv:null,ctx:null,beeped:false,unlocked:false},timerEl=document.getElementById('timer'),timerTime=document.getElementById('timerTime'),arc=document.getElementById('timerArc'),C=106.8;
-/* The rest-over sound. Two ways, so it's heard either way:
-   an <audio> clip (plays on iPhone even with the ring/silent switch on silent) and Web Audio as backup.
-   The clip is built here: three short 880 Hz blips in a small WAV file. */
-var AUD=(function(){try{var rate=22050,blip=0.16,gap=0.12,n=Math.round(rate*(blip*3+gap*2)),pcm=new Uint8Array(44+n*2),dv=new DataView(pcm.buffer);
-  function str(o,t){for(var i=0;i<t.length;i++)pcm[o+i]=t.charCodeAt(i);}
-  str(0,'RIFF');dv.setUint32(4,36+n*2,true);str(8,'WAVE');str(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,rate,true);dv.setUint32(28,rate*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);str(36,'data');dv.setUint32(40,n*2,true);
-  for(var i=0;i<n;i++){var t=i/rate,k=t%(blip+gap),on=k<blip,env=on?Math.min(1,k/0.01,(blip-k)/0.03):0,v=Math.sin(2*Math.PI*880*t)*env*0.8;dv.setInt16(44+i*2,Math.round(v*32767),true);}
-  var b='';for(var j=0;j<pcm.length;j++)b+=String.fromCharCode(pcm[j]);
-  var a=new Audio('data:audio/wav;base64,'+btoa(b));a.preload='auto';a.setAttribute('playsinline','');return a;}catch(e){return null;}})();
-/* iPhone only lets a sound play after a tap. The first set you check is that tap: play and stop straight away, then it's unlocked. */
-function unlockSound(){if(T.unlocked||!AUD)return;T.unlocked=true;try{var p=AUD.play();if(p&&p.then)p.then(function(){AUD.pause();AUD.currentTime=0;}).catch(function(){});}catch(e){}}
-function beep(){
-  try{if(AUD){AUD.currentTime=0;var p=AUD.play();if(p&&p.catch)p.catch(function(){});}}catch(e){}
-  try{if(T.ctx){[0,0.28,0.56].forEach(function(o){var osc=T.ctx.createOscillator(),g=T.ctx.createGain();osc.frequency.value=880;g.gain.value=0.2;osc.connect(g);g.connect(T.ctx.destination);osc.start(T.ctx.currentTime+o);osc.stop(T.ctx.currentTime+o+0.16);});}}catch(e){}
-  try{if(navigator.vibrate)navigator.vibrate([250,100,250,100,250]);}catch(e){}
-}
+var T={end:0,total:0,iv:null,beeped:false},timerEl=document.getElementById('timer'),timerTime=document.getElementById('timerTime'),arc=document.getElementById('timerArc'),C=106.8;
+/* Rest over: no sound. A short buzz where the phone supports it, and the next set lights up. */
+function buzz(){try{if(navigator.vibrate)navigator.vibrate([250,100,250,100,250]);}catch(e){}}
 /* Point at the next set to do: the first unchecked set in the open exercise */
 function markNext(){main.querySelectorAll('.set.is-next').forEach(function(r){r.classList.remove('is-next')});var row=main.querySelector('.ex.open .set:not(.is-done)');if(!row)return;row.classList.add('is-next');try{row.scrollIntoView({block:'nearest',behavior:reduced?'auto':'smooth'});}catch(e){}}
 function tick(){var left=Math.round((T.end-Date.now())/1000);
-  if(left<=0){timerTime.innerHTML='Go<small>Next set</small>';timerEl.classList.add('is-over');arc.setAttribute('stroke-dashoffset','0');if(!T.beeped){T.beeped=true;beep();markNext();toast('Rest over. Next set.');}if(left<-25)stopTimer();return;}
+  if(left<=0){timerTime.innerHTML='Go<small>Next set</small>';timerEl.classList.add('is-over');arc.setAttribute('stroke-dashoffset','0');if(!T.beeped){T.beeped=true;buzz();markNext();toast('Rest over. Next set.');}if(left<-25)stopTimer();return;}
   timerEl.classList.remove('is-over');timerTime.innerHTML=Math.floor(left/60)+':'+pad(left%60)+'<small>Rest</small>';arc.setAttribute('stroke-dashoffset',String(C*(1-left/T.total)));}
-function startTimer(sec){try{var AC=window.AudioContext||window.webkitAudioContext;if(AC&&!T.ctx)T.ctx=new AC();if(T.ctx&&T.ctx.state==='suspended')T.ctx.resume();}catch(e){}unlockSound();
+function startTimer(sec){
   wakeOn();document.body.classList.add('timer-on');T.total=sec;T.end=Date.now()+sec*1000;T.beeped=false;timerEl.classList.add('show');timerEl.setAttribute('aria-hidden','false');clearInterval(T.iv);T.iv=setInterval(tick,250);tick();}
 var WL=null;function wakeOn(){try{if('wakeLock' in navigator&&!WL){navigator.wakeLock.request('screen').then(function(l){WL=l;l.addEventListener('release',function(){WL=null;});}).catch(function(){});}}catch(e){}}
 function wakeOff(){try{if(WL){WL.release();}}catch(e){}WL=null;}
@@ -1278,7 +1266,7 @@ timerEl.addEventListener('click',function(ev){var b=ev.target.closest('button');
 
 /* ================= storage ================= */
 /* read-only peek for the automated tests */
-window.__dbg=function(){return {T:T,AUD:AUD,S:S}};
+window.__dbg=function(){return {T:T,S:S}};
 function persist(){var ok=LS.set(K.sessions,S.sessions)&&LS.set(K.bw,S.bw)&&LS.set(K.checks,S.checks);if(!ok)toast('Couldn’t save on this phone. Back up your data, then free some space.');return ok;}
 function setChecks(mut){var t=todayStr(),all=JSON.parse(JSON.stringify(S.checks||{}));all[t]=all[t]||{};mut(all[t]);var keys=Object.keys(all).sort(),trimmed={};keys.slice(-90).forEach(function(k){trimmed[k]=all[k]});S.checks=trimmed;persist();}
 
