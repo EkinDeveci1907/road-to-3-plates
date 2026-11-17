@@ -20,7 +20,7 @@ Order rules: the day's big lift first, then push and pull take turns so nothing 
 then isolation, with biceps and triceps alternating at the end.
 
 - Mon Upper A: bench (top, back-off, wide) → barbell row → cable fly → pull-ups → DB lateral raise → reverse pec deck → EZ-bar curl → overhead rope extension → behind-the-body cable curl → tricep pushdown
-- Wed Lower A: squat (top, back-off) → DB Romanian deadlift → leg extension → seated leg curl → hip abductor → seated calf raise → decline sit-up (plate behind head) → cable crunch → cable woodchop
+- Wed Lower A: squat (top, back-off) → DB Romanian deadlift → leg extension → seated leg curl → hip abductor → seated calf raise → decline sit-up (plate behind head) → cable crunch
 - Thu Upper B: bench (heavy, volume, wide) → lat pulldown → incline DB press → close-grip cable row → weighted dips → DB lateral raise → rope face pull → incline DB curl → EZ-bar incline skull crusher → hammer curl
 - Fri Lower B: DB shoulder press (first, fresh) → cable lateral raise → Bulgarian split squat → hip thrust → leg extension → seated leg curl → hip adductor → seated calf raise → DB shrug → back extension → cable crunch
 

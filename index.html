@@ -498,8 +498,7 @@ var WORKOUTS=[
    {name:'Hip abductor machine',label:'Hip abductor (spread)',sets:3,reps:'12–15',rest:60,hint:'Lean slightly forward, push the pads out as wide as you can, pause a second at the top. Side glutes.'},
    {name:'Seated calf raise',sets:3,reps:'12–15',rest:60,hint:'Full stretch at the bottom, pause a second at the top.'},
    {name:'Decline sit-up',label:'Decline sit-up (plate behind head)',sets:2,reps:'10–15',rest:60,bw:true,dp:true,hint:'Hold the plate behind your head, elbows forward, chin slightly tucked. Your arms only hold the plate, never pull your head. Curl up one vertebra at a time and lower slowly. Log the plate’s weight.'},
-   {name:'Cable crunch',sets:3,reps:'12–15',rest:60,hint:'V-bar. Round your back and crunch your ribs toward your hips.'},
-   {name:'Cable woodchop',label:'Cable woodchop (each side)',sets:2,reps:'10–12',rest:60,hint:'Obliques, the sides of your abs. Cable up high, stand side-on, pull the handle down and across to your opposite hip by turning your chest, arms almost straight. Both sides for each set. Log one side’s weight.'}]},
+   {name:'Cable crunch',sets:3,reps:'12–15',rest:60,hint:'V-bar. Round your back and crunch your ribs toward your hips.'}]},
  {key:'upperB',day:'Thu',name:'Upper B',about:'One heavy bench set, then volume',ex:[
    {name:'Bench press – heavy set',label:'Bench press',sub:'Heavy set',media:'Bench press',kind:'benchHeavy',rest:180,bar:true,hint:'Normal grip: tip of your thumb on the dashed part of the bar, thumb tucked around it.'},
    {name:'Bench press – volume',label:'Bench press',sub:'Volume sets',media:'Bench press',kind:'benchVol',rest:150,bar:true,hint:'Normal grip, two hard sets of 6–8. Same weight both sets.'},
@@ -566,7 +565,7 @@ function fmtRest(s){var m=Math.floor(s/60),x=s%60;return m?(x?m+':'+pad(x):m+':0
 function lbs(n){return Math.round(n).toLocaleString('en-CA')}
 var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:P+'.drafts',sessions:P+'.sessions',bw:P+'.bw',checks:P+'.checks',seeded:P+'.seeded',hint:P+'.hideInstall'};
-var APP_VERSION='5.3 (Nov 17)';
+var APP_VERSION='5.4 (Nov 17)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
@@ -893,7 +892,7 @@ function setRows(rex,e,before,idx){
 function tipHtml(){
   var standalone=window.navigator.standalone===true||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches);
   if(!standalone&&/iPhone|iPad|iPod/.test(navigator.userAgent)&&!LS.get(K.hint,false))return '<div class="tip"><p>Tap Share, then <b>Add to Home Screen</b>. Open it from that icon and it runs full screen, with no Safari bar.</p><button type="button" data-act="hidehint" aria-label="Dismiss tip">×</button></div>';
-  if(LS.get(P+'.planNote','')!=='5.3'&&S.sessions.some(function(s){return s.date<'2026-11-17'}))return '<div class="tip"><p><b>Updated plan.</b> New exercise order so you’re fresh for the hard lifts. Shoulder press is first on Friday, with cable lateral raises after it. New: overhead rope extension and reverse pec deck (Mon), dumbbell RDL and cable woodchop (Wed), rope face pull (Thu). Decline sit-ups are with the plate behind your head. Small arm and shoulder lifts now go up 5 lbs once every set hits the top reps.</p><button type="button" data-act="hideplan" aria-label="Dismiss plan note">×</button></div>';
+  if(LS.get(P+'.planNote','')!=='5.3'&&S.sessions.some(function(s){return s.date<'2026-11-17'}))return '<div class="tip"><p><b>Updated plan.</b> New exercise order so you’re fresh for the hard lifts. Shoulder press is first on Friday, with cable lateral raises after it. New: overhead rope extension and reverse pec deck (Mon), dumbbell RDL (Wed), rope face pull (Thu). Decline sit-ups are with the plate behind your head. Small arm and shoulder lifts now go up 5 lbs once every set hits the top reps.</p><button type="button" data-act="hideplan" aria-label="Dismiss plan note">×</button></div>';
   return '';
 }
 function daySeg(){return segHtml(DAYS.map(function(dn){var k=SCHED[dn];return [String(dn),DSHORT[dn],k?CODE[k]:'rest']}),String(curDay()),'data-day','seg--days');}
