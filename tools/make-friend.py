@@ -52,7 +52,7 @@ rep("'road-to-3-plates-backup-'", f"'{slug}-backup-'")
 if old_link:
     rep("aria-label=\"Dismiss tip\">×</button></div>';\n",
         "aria-label=\"Dismiss tip\">×</button></div>';\n"
-        "  if(location.pathname.indexOf('/3-plates/')===0)h+='<div class=\"tip\"><p>Your app has a new link: <a href=\"https://ekindeveci1907.github.io/Ahmed/\" style=\"color:inherit\"><b>ekindeveci1907.github.io/Ahmed</b></a>. To move your workouts, open Settings (the gear at the top), tap <b>Back up now</b> and save the file. Then open the new link in Safari, add it to your Home Screen, and tap <b>Restore</b>.</p></div>';\n")
+        "  if(location.pathname.indexOf('/3-plates/')===0)return '<div class=\"tip\"><p>Your app has a new link: <a href=\"https://ekindeveci1907.github.io/Ahmed/\" style=\"color:inherit\"><b>ekindeveci1907.github.io/Ahmed</b></a>. To move your workouts, open Settings (the gear at the top), tap <b>Back up now</b> and save the file. Then open the new link in Safari, add it to your Home Screen, and tap <b>Restore</b>.</p></div>';\n")
 
 assert "r235" not in s, 'an r235 key slipped through'
 assert "Eko" not in s, 'Eko-specific text slipped through'
