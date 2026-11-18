@@ -1474,6 +1474,10 @@ function cloudCard(){var u=cloudUrl(),at=LS.get(P+'.cloudAt',0),top='<div style=
   if(u)return top+'<p class="fine" style="margin-top:0"><b style="color:var(--tx)">Google Sheet sync is on.</b> '+(CLD.err?esc(CLD.err)+'.':at?'Last synced '+ago(at)+'.':'Syncing\u2026')+' Finished workouts are saved to the \u201cApp log\u201d tab, and workouts you type into the sheet show up here.</p><div class="actions-row"><button type="button" class="btn btn--ghost" data-act="cloudsync">Sync now</button><button type="button" class="btn btn--ghost" data-act="cloudoff">Turn off sync</button></div></div>';
   if(!S.cloudOpen)return top+'<button type="button" class="link" data-act="cloudshow" style="margin:-4px 0">Set up Google Sheet sync (optional) ›</button></div>';
   return top+'<label class="flabel" for="cloudIn" style="margin-top:0">Sync with your Google Sheet: paste its link</label><div class="inline" style="margin-top:0"><input class="field" id="cloudIn" type="url" placeholder="https://script.google.com/macros/s/\u2026" autocomplete="off"><button type="button" class="btn" data-act="cloudon">Connect</button></div><p class="fine">Once connected, every workout is also saved in your sheet, so nothing is lost if your phone is.</p></div>';}
+/* Test hook. The automated tests in tests/ open the page with window.R3P_TEST set and get these functions
+   to check them one at a time. On a phone it is never set, so this does nothing. */
+if(typeof window.R3P_TEST==='function')window.R3P_TEST({e1rm:e1rm,plusFive:plusFive,weekIndex:weekIndex,workout:workout,lastWorking:lastWorking,lastDone:lastDone,
+  recommend:recommend,resolveEx:resolveEx,phWeight:phWeight,toCsv:toCsv,state:function(){return S;}});
 render();
 if(CFG.seed)syncSheet();
 syncCloud();
