@@ -1,0 +1,8 @@
+# Python lint for tests/ and tools/ (same tool as the Lab 8 pipeline): ruff's default rules plus sorted imports.
+line-length = 160
+
+[lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[lint.isort]
+known-first-party = ["conftest"]

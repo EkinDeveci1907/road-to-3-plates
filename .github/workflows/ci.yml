@@ -1,0 +1,83 @@
+# Continuous integration: the same three stages as the CSCI 3130 Lab 8 pipeline (lint, test, build),
+# on GitHub Actions instead of GitLab. Runs on every pull request and every push to main.
+# GitHub Pages publishes main, so changes go through a pull request and only get merged once this is green.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Lint the app (ESLint)
+        run: |
+          npm ci --no-audit --no-fund
+          npm run lint
+      - name: Lint tests and tools (ruff)
+        run: |
+          pip install -r requirements-dev.txt
+          ruff check tests tools
+      - name: Phones only update when sw.js changes
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then echo "nothing to compare"; exit 0; fi
+          git fetch -q --depth=1 origin "$BASE"
+          changed=$(git diff --name-only "$BASE" HEAD)
+          if echo "$changed" | grep -qx 'index.html' && ! echo "$changed" | grep -qx 'sw.js'; then
+            echo "::error::index.html changed but the VERSION in sw.js didn't, so phones would keep the old app. Bump it."
+            exit 1
+          fi
+          echo "ok"
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install pytest and a headless browser
+        run: |
+          pip install -r requirements-dev.txt
+          python -m playwright install --with-deps chromium
+      - name: Unit, integration, system and build tests
+        run: pytest
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build Ahmed's copies (his repo gets these files after the merge)
+        run: |
+          for spec in "ahm Ahmed" "tpf 3-plates"; do
+            set -- $spec
+            mkdir -p "dist/$2"
+            python3 tools/make-friend.py Ahmed tpf "$1" "dist/$2/index.html" "dist/$2/sw.js" "dist/$2/manifest.webmanifest" --old-link
+            cp icon-*.png "dist/$2/"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ahmed-copies-${{ github.sha }}
+          path: dist/
+          retention-days: 7
