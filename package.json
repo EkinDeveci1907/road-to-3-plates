@@ -1,0 +1,11 @@
+{
+  "name": "road-to-3-plates",
+  "private": true,
+  "scripts": {
+    "lint": "python3 tools/extract-js.py && eslint build"
+  },
+  "devDependencies": {
+    "eslint": "9.39.1",
+    "globals": "15.15.0"
+  }
+}
