@@ -20,7 +20,7 @@ Order rules: the day's big lift first, then push and pull take turns so nothing 
 then isolation, with biceps and triceps alternating at the end.
 
 - Mon Upper A: bench (top, back-off, wide) → barbell row → cable fly (2 sets) → pull-ups → DB lateral raise → reverse pec deck → EZ-bar curl → overhead rope extension → Bayesian cable curl → tricep pushdown
-- Wed Lower A: squat (top, back-off) → DB Romanian deadlift → leg extension → seated leg curl → hip abductor → seated calf raise → decline sit-up (plate behind head) → cable crunch
+- Wed Lower A: squat (top, back-off) → barbell Romanian deadlift (straps) → leg extension → seated leg curl → hip abductor → seated calf raise → decline sit-up (plate behind head) → cable crunch
 - Thu Upper B: bench (heavy, volume, wide) → lat pulldown → incline DB press → close-grip cable row → weighted dips → low-to-high cable fly → DB lateral raise → rope face pull → incline DB curl → EZ-bar incline skull crusher → Bayesian cable curl
 - Fri Lower B: DB shoulder press (first, fresh) → cable lateral raise → Bulgarian split squat → hip thrust → leg extension → seated leg curl → hip adductor → seated calf raise → DB shrug → back extension → decline sit-up (plate behind head) → cable crunch
 
@@ -33,7 +33,7 @@ Side delts get three days (Mon, Thu, Fri) because they were the one muscle under
 - Bodyweight-only (pull-ups): add 5 lbs once every set reaches the top of the rep range.
 - "Last time" shows the most recent time you did that exercise, any day. A skipped day (only 0 × 0 sets or just a note) doesn't count. Bench rows show every bench set from that day.
 - The Bayesian cable curl keeps its code name `Behind-the-body cable curl`, so Monday and Thursday share one history.
-- Dumbbell RDL has its own history: old `Romanian deadlift` logs are barbell weights (the whole bar), so they aren't used for one dumbbell. It starts at 75.
+- Wednesday's RDL is the barbell one (`Romanian deadlift`) and carries on from those logs. The dumbbell RDL is still a swap option with its own history, because barbell numbers are the whole bar, not one dumbbell.
 
 ## Today tab
 - All seven days across the top, opens on today. Tue, Sat and Sun are rest days: a rest page (eat, sleep, chill) that says what's next, offers "Train anyway", and keeps a missed day open until Sunday ("Do Lower B today").

@@ -115,21 +115,19 @@ def test_heavy_bench_chain_monday_to_thursday(open_app):
 
 
 @pytest.mark.unit
-def test_dumbbell_rdl_target_is_per_dumbbell_not_the_barbell_weight(open_app):
-    # Arrange: dumbbell RDLs in October (one dumbbell's weight), then barbell RDLs in November
-    # (the whole bar), all saved under the old name "Romanian deadlift"
+def test_wednesday_rdl_is_barbell_and_carries_on_from_the_barbell_numbers(open_app):
+    # Arrange: barbell RDLs on Nov 4 and Nov 11 (the whole bar), dumbbell ones before that
     app = open_app("eko", sessions=[
-        workout("2026-10-21", "lowerA", "Lower A", [("Romanian deadlift", [(70, 6), (70, 6)], "Dumbbells this time")]),
-        workout("2026-10-28", "lowerA", "Lower A", [("Romanian deadlift", [(75, 6), (75, 6)])]),
+        workout("2026-10-28", "lowerA", "Lower A", [("Romanian deadlift", [(75, 6), (75, 6)], "Dumbbells this time")]),
         workout("2026-11-04", "lowerA", "Lower A", [("Romanian deadlift", [(135, 6), (135, 6)], "Did this on squat barbell")]),
         workout("2026-11-11", "lowerA", "Lower A", [("Romanian deadlift", [(140, 8), (140, 8)])]),
     ])
 
     # Act
-    t = app.target("lowerA", "DB Romanian deadlift", WED)
-    shown = app.box_weight("lowerA", "DB Romanian deadlift", WED)
+    wednesday = app.page.evaluate("() => window.__r3p.workout('lowerA').ex.map(x => x.name)")
+    t = app.target("lowerA", "Romanian deadlift", WED)
 
-    # Assert: no 145 lb dumbbells. With no dumbbell RDL under the new name yet, the box starts
-    # at the last dumbbell weight he used (75).
-    assert t is None or t["w"] < 100
-    assert shown == "75"
+    # Assert: straps now, so it's the barbell RDL right after squats, at 140 + 5
+    assert "DB Romanian deadlift" not in wednesday
+    assert wednesday.index("Romanian deadlift") == wednesday.index("Squat – back-off sets") + 1
+    assert t["w"] == 145
