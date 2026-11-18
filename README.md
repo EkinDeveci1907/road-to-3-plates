@@ -11,7 +11,7 @@ Logs are saved on the phone. Settings (gear) → Back up now keeps a copy; `back
 - Shayan: https://ekindeveci1907.github.io/road-to-3-plates/shayan/ (folder `shayan/` in this repo)
 - Pavle: https://ekindeveci1907.github.io/road-to-3-plates/pavle/ (folder `pavle/` in this repo)
 
-## The plan (v5.3)
+## The plan (v5.5)
 Mon Upper A, Wed Lower A, Thu Upper B, Fri Lower B: every muscle twice a week. Big compound lifts get 2–3 hard sets of 6–8; isolation work gets 2–3 sets.
 Bench keeps 4–5 sets: Monday top set + 3 back-off sets + 1 wide-grip set; Thursday heavy set + 2 volume sets + 1 wide-grip set.
 The wide-grip set is always the last bench set: lighter, 10–12 reps.
@@ -22,7 +22,7 @@ then isolation, with biceps and triceps alternating at the end.
 - Mon Upper A: bench (top, back-off, wide) → barbell row → cable fly → pull-ups → DB lateral raise → reverse pec deck → EZ-bar curl → overhead rope extension → behind-the-body cable curl → tricep pushdown
 - Wed Lower A: squat (top, back-off) → DB Romanian deadlift → leg extension → seated leg curl → hip abductor → seated calf raise → decline sit-up (plate behind head) → cable crunch
 - Thu Upper B: bench (heavy, volume, wide) → lat pulldown → incline DB press → close-grip cable row → weighted dips → DB lateral raise → rope face pull → incline DB curl → EZ-bar incline skull crusher → hammer curl
-- Fri Lower B: DB shoulder press (first, fresh) → cable lateral raise → Bulgarian split squat → hip thrust → leg extension → seated leg curl → hip adductor → seated calf raise → DB shrug → back extension → cable crunch
+- Fri Lower B: DB shoulder press (first, fresh) → cable lateral raise → Bulgarian split squat → hip thrust → leg extension → seated leg curl → hip adductor → seated calf raise → DB shrug → back extension → decline sit-up (plate behind head) → cable crunch
 
 Side delts get three days (Mon, Thu, Fri) because they were the one muscle under 10 hard sets a week.
 

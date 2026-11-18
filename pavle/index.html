@@ -523,6 +523,7 @@ var WORKOUTS=[
    {name:'Seated calf raise',sets:3,reps:'12–15',rest:60},
    {name:'DB shrug',label:'Dumbbell shrug',sets:2,reps:'12–15',rest:60,hint:'Log the weight of one dumbbell. Straight up, hold a second at the top.'},
    {name:'Back extension (hyperextension)',label:'Back extension',sets:2,reps:'12–15',rest:60,bw:true,hint:'Hold a plate to your chest and log its weight (0 is bodyweight). Moved here from Wednesday so your lower back isn’t already done from squats and RDLs.'},
+   {name:'Decline sit-up',label:'Decline sit-up (plate behind head)',sets:2,reps:'10–15',rest:60,bw:true,dp:true,hint:'Hold the plate behind your head, elbows forward, chin slightly tucked. Your arms only hold the plate, never pull your head. Curl up one vertebra at a time and lower slowly. Log the plate’s weight.'},
    {name:'Cable crunch',sets:3,reps:'12–15',rest:60,hint:'V-bar. Round your back and crunch your ribs toward your hips.'}]}
 ];
 var SCHED={1:'upperA',3:'lowerA',4:'upperB',5:'lowerB'},CODE={upperA:'Up A',lowerA:'Lo A',upperB:'Up B',lowerB:'Lo B'},DAYNAME={Mon:'Monday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday'};
@@ -558,7 +559,7 @@ function fmtRest(s){var m=Math.floor(s/60),x=s%60;return m?(x?m+':'+pad(x):m+':0
 function lbs(n){return Math.round(n).toLocaleString('en-CA')}
 var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:P+'.drafts',sessions:P+'.sessions',bw:P+'.bw',checks:P+'.checks',seeded:P+'.seeded',hint:P+'.hideInstall'};
-var APP_VERSION='5.4 (Nov 17)';
+var APP_VERSION='5.5 (Nov 18)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
@@ -885,7 +886,7 @@ function setRows(rex,e,before,idx){
 function tipHtml(){
   var standalone=window.navigator.standalone===true||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches);
   if(!standalone&&/iPhone|iPad|iPod/.test(navigator.userAgent)&&!LS.get(K.hint,false))return '<div class="tip"><p>Tap Share, then <b>Add to Home Screen</b>. Open it from that icon and it runs full screen, with no Safari bar.</p><button type="button" data-act="hidehint" aria-label="Dismiss tip">×</button></div>';
-  if(LS.get(P+'.planNote','')!=='5.3'&&S.sessions.some(function(s){return s.date<'2026-11-17'}))return '<div class="tip"><p><b>Updated plan.</b> New exercise order so you’re fresh for the hard lifts. Shoulder press is first on Friday, with cable lateral raises after it. New: overhead rope extension and reverse pec deck (Mon), dumbbell RDL (Wed), rope face pull (Thu). Decline sit-ups are with the plate behind your head. Small arm and shoulder lifts now go up 5 lbs once every set hits the top reps.</p><button type="button" data-act="hideplan" aria-label="Dismiss plan note">×</button></div>';
+  if(LS.get(P+'.planNote','')!=='5.3'&&S.sessions.some(function(s){return s.date<'2026-11-17'}))return '<div class="tip"><p><b>Updated plan.</b> New exercise order so you’re fresh for the hard lifts. Shoulder press is first on Friday, with cable lateral raises after it. New: overhead rope extension and reverse pec deck (Mon), dumbbell RDL (Wed), rope face pull (Thu). Decline sit-ups (Wed and Fri) are with the plate behind your head. Small arm and shoulder lifts now go up 5 lbs once every set hits the top reps.</p><button type="button" data-act="hideplan" aria-label="Dismiss plan note">×</button></div>';
   return '';
 }
 function daySeg(){return segHtml(DAYS.map(function(dn){var k=SCHED[dn];return [String(dn),DSHORT[dn],k?CODE[k]:'rest']}),String(curDay()),'data-day','seg--days');}
