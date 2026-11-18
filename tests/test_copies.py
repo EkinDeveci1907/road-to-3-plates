@@ -51,7 +51,7 @@ def test_log_a_set_save_and_it_is_still_there_after_reopening(open_app):
     first.locator('[data-act="check"]').click()
     page.locator("#finishBtn").click()
     page.get_by_role("button", name="Save workout").click()
-    page.get_by_text("Lower A saved").wait_for()
+    page.locator("#toastMsg", has_text="Lower A saved").wait_for()
     page.reload()
     page.wait_for_function("() => window.__r3p")
 
@@ -75,9 +75,6 @@ def test_an_update_never_touches_saved_workouts(open_app):
     # Act: open the new version
     app = open_app("eko", sessions=before)
 
-    # Assert: every workout that was on the phone is still there, byte for byte
-    # (Eko's copy may also pull in a workout from logs.json, which is fine)
-    after = {s["id"]: s for s in app.stored("sessions")}
-    for s in before:
-        assert after[s["id"]] == s
+    # Assert: byte for byte the same workouts
+    assert app.stored("sessions") == before
     assert app.errors == []

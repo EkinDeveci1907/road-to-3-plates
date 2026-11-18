@@ -36,7 +36,9 @@ COPIES = {
     "pavle": ("road-to-3-plates/pavle/", "pav"),
 }
 
-IPHONE = {"viewport": {"width": 390, "height": 844}, "device_scale_factor": 2, "is_mobile": True, "has_touch": True}
+# Halifax time, so dates line up the same on any computer (November is UTC-4)
+IPHONE = {"viewport": {"width": 390, "height": 844}, "device_scale_factor": 2, "is_mobile": True, "has_touch": True,
+          "timezone_id": "America/Halifax"}
 
 
 def build_friend(name, prefix, cache, out_dir, old_link=False):
@@ -139,16 +141,21 @@ def open_app(browser, base_url):
         contexts.append(ctx)
         # exercise photos come from GitHub; the tests don't need them
         ctx.route("https://raw.githubusercontent.com/**", lambda route: route.abort())
+        # stub for the Google Sheet sync file, so only the test's own workouts are on the phone
+        ctx.route("**/logs.json", lambda route: route.fulfill(json=[]))
         page = ctx.new_page()
         app = App(page, prefix)
-        page.clock.set_fixed_time(datetime.datetime.fromisoformat(today + "T10:00:00"))
+        page.clock.set_fixed_time(datetime.datetime.fromisoformat(today + "T10:00:00-04:00"))
         seed = dict(storage or {})
         if sessions is not None:
             seed.update({"sessions": sessions, "seeded": True, "seedv": 2})
+        # put the starting workouts on the "phone" once; a reload must not put them back
         page.add_init_script(
             "window.R3P_TEST = (api) => { window.__r3p = api; };\n"
-            + "".join(f"localStorage.setItem({json.dumps(prefix + '.' + k)}, {json.dumps(json.dumps(v))});\n"
+            "if (!sessionStorage.getItem('test-seeded')) {\n"
+            + "".join(f"  localStorage.setItem({json.dumps(prefix + '.' + k)}, {json.dumps(json.dumps(v))});\n"
                       for k, v in seed.items())
+            + "  sessionStorage.setItem('test-seeded', '1');\n}\n"
         )
         page.goto(base_url + folder)
         page.wait_for_function("() => window.__r3p")

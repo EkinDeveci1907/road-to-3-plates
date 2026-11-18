@@ -7,6 +7,8 @@ open instead of Eko's pre-loaded numbers and logs, and its own service-worker ca
 
     python3 tools/make-friend.py Ahmed  tpf ahm ../ahmed/index.html  ../ahmed/sw.js  ../ahmed/manifest.webmanifest --old-link
     python3 tools/make-friend.py Shayan shy shy shayan/index.html    shayan/sw.js    shayan/manifest.webmanifest
+
+After building, run the tests (pytest) before pushing.
 """
 import re
 import sys
@@ -59,15 +61,11 @@ assert "Eko" not in s, 'Eko-specific text slipped through'
 open(out_html, 'w', encoding='utf-8').write(s)
 
 # ---- service worker: own cache name, same code ----
+# The version number follows the main app's sw.js, so every copy updates together and building twice
+# gives exactly the same files (the tests check that the committed copies match a fresh build).
 sw = open('sw.js', encoding='utf-8').read()
 m = re.search(r"const VERSION = 'r3p-v(\d+)';", sw)
-old_sw = ''
-try:
-    old_sw = open(out_sw, encoding='utf-8').read()
-except OSError:
-    pass
-mv = re.search(r"const VERSION = '%s-v(\d+)';" % cache, old_sw)
-v = int(mv.group(1)) + 1 if mv else 1
+v = int(m.group(1))
 sw = sw.replace(m.group(0), f"const VERSION = '{cache}-v{v}';")
 sw = sw.replace("const OWN = 'r3p-';", f"const OWN = '{cache}-';")
 sw = sw.replace('// Road to 3 Plates, offline support.', f"// {name}'s 3 Plates, offline support.")
