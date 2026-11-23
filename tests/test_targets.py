@@ -131,3 +131,49 @@ def test_wednesday_rdl_is_barbell_and_carries_on_from_the_barbell_numbers(open_a
     assert "DB Romanian deadlift" not in wednesday
     assert wednesday.index("Romanian deadlift") == wednesday.index("Squat – back-off sets") + 1
     assert t["w"] == 145
+
+
+MON_NOV_23 = "2026-11-23"
+
+
+@pytest.mark.unit
+def test_eko_has_no_deload_week(open_app):
+    # Arrange: Monday 240 x 3, then 245 x 2 on Thursday (2 reps, doesn't count), back-offs 205, rows 115
+    app = open_app("eko", today=MON_NOV_23, sessions=[
+        workout("2026-11-16", "upperA", "Upper A", [
+            ("Bench press – top set", [(240, 3)]),
+            ("Bench press – back-off sets", [(205, 6), (205, 6), (205, 6)]),
+            ("Barbell row", [(115, 10), (115, 10)]),
+        ]),
+        workout("2026-11-19", "upperB", "Upper B", [("Bench press – heavy set", [(245, 2)])]),
+    ])
+
+    # Act
+    top = app.target("upperA", "Bench press – top set", MON_NOV_23)
+    back = app.page.evaluate("""(d) => { const t = window.__r3p;
+        const ex = t.workout('upperA').ex.find(x => x.name === 'Bench press – back-off sets');
+        return t.resolveEx(ex, t.weekIndex(d), d); }""", MON_NOV_23)
+    row = app.target("upperA", "Barbell row", MON_NOV_23)
+    body = app.page.inner_text("body")
+
+    # Assert: a normal week, every lift up 5 from the last one that counted, full sets
+    assert top["w"] == 245
+    assert back["w"] == 210 and back["sets"] == 3
+    assert row["w"] == 120
+    assert "Deload" not in body and "deload" not in body
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("copy", ["shayan", "pavle", "ahmed"])
+def test_friends_still_have_their_deload_week(open_app, copy):
+    # Arrange
+    app = open_app(copy, sessions=[])
+
+    # Act: Barbell row in week 9 of their block (week index 8)
+    row = app.page.evaluate("""() => { const t = window.__r3p;
+        const ex = t.workout('upperA').ex.find(x => x.name === 'Barbell row');
+        return t.resolveEx(ex, 8, '2027-03-01'); }""")
+
+    # Assert: half the sets, deload hint
+    assert row["sets"] == 2
+    assert "Deload" in row["hint"]
