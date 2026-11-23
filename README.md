@@ -28,7 +28,7 @@ Side delts get three days (Mon, Thu, Fri) because they were the one muscle under
 
 ## How targets work
 - Every exercise: the heaviest weight from the last time you did it (any day) + 5 lbs, once a week.
-- Small shoulder and arm lifts (lateral raises, rear delts, curls, triceps) and the decline sit-up: same weight until every set at that weight hits the top of the rep range, then + 5 lbs. On a 35 lb dumbbell, 5 lbs is a 14% jump, so it's earned with reps first. Already did it earlier this week → same weight. Sets of 2 reps or fewer and deload week don't count.
+- Small shoulder and arm lifts (lateral raises, rear delts, curls, triceps) and the decline sit-up: same weight until every set at that weight hits the top of the rep range, then + 5 lbs. On a 35 lb dumbbell, 5 lbs is a 14% jump, so it's earned with reps first. Already did it earlier this week → same weight. Sets of 2 reps or fewer don't count. No deload week (taken out Nov 23).
 - Bench: Monday's top set and Thursday's heavy set are one chain, each 5 lbs more than the last heavy bench (210 Thu → 215 Mon → 220 Thu). Back-off sets, Thursday volume sets and the wide-grip set each follow their own last weight, +5 a week (first wide-grip set: about 75% of the top set). The 11-week table in `BENCH_TOP` is only the starting line; Settings → Your numbers resets it from a new 5-rep max.
 - Bodyweight-only (pull-ups): add 5 lbs once every set reaches the top of the rep range.
 - "Last time" shows the most recent time you did that exercise, any day. A skipped day (only 0 × 0 sets or just a note) doesn't count. Bench rows show every bench set from that day.

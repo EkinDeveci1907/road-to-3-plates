@@ -165,15 +165,15 @@ def test_eko_has_no_deload_week(open_app):
 
 @pytest.mark.unit
 @pytest.mark.parametrize("copy", ["shayan", "pavle", "ahmed"])
-def test_friends_still_have_their_deload_week(open_app, copy):
+def test_friends_have_no_deload_week_either(open_app, copy):
     # Arrange
     app = open_app(copy, sessions=[])
 
-    # Act: Barbell row in week 9 of their block (week index 8)
+    # Act: Barbell row in week 9 of their block (week index 8), where the deload used to be
     row = app.page.evaluate("""() => { const t = window.__r3p;
         const ex = t.workout('upperA').ex.find(x => x.name === 'Barbell row');
         return t.resolveEx(ex, 8, '2027-03-01'); }""")
 
-    # Assert: half the sets, deload hint
-    assert row["sets"] == 2
-    assert "Deload" in row["hint"]
+    # Assert: full sets, no deload hint
+    assert row["sets"] == 3
+    assert "Deload" not in row["hint"]

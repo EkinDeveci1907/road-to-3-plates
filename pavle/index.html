@@ -462,7 +462,7 @@ P=CFG.prefix;
 var PROF=(function(){try{return JSON.parse(localStorage.getItem(CFG.prefix+'.profile'))||null}catch(e){return null}})();
 function mondayOf(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
 var B0=PROF&&PROF.bench?PROF.bench:CFG.bench, S0=PROF&&PROF.squat?PROF.squat:CFG.squat, BWG=PROF&&PROF.bwGoal?PROF.bwGoal:CFG.bwGoal, HT=PROF&&PROF.heightIn?PROF.heightIn:CFG.heightIn, AGE=PROF&&PROF.age?PROF.age:CFG.age;
-var PLAN_START=PROF&&PROF.start?new Date(PROF.start[0],PROF.start[1],PROF.start[2]):CFG.start?new Date(CFG.start[0],CFG.start[1],CFG.start[2]):mondayOf(new Date()), DELOAD_WEEK=CFG.deload===false?null:8, GOAL=315, BEST_BENCH=CFG.bestBench||null;
+var PLAN_START=PROF&&PROF.start?new Date(PROF.start[0],PROF.start[1],PROF.start[2]):CFG.start?new Date(CFG.start[0],CFG.start[1],CFG.start[2]):mondayOf(new Date()), DELOAD_WEEK=null, GOAL=315, BEST_BENCH=CFG.bestBench||null;
 function block(b,adds,reps){return adds.map(function(a,i){return a==='DL'?'DL':a==null?null:[b+a,reps[i]]});}
 /* Week-by-week top sets for this block: 5 lbs a week off your 5-rep max. Today's actual target also looks at what you logged (see topTarget). */
 var BENCH_TOP=(CFG.seed&&!(PROF&&PROF.start))?block(B0,[null,0,5,10,15,20,25,30,'DL',35,40],['','5','5','5','4–5','4–5','4','3–4','DL','3','3'])
@@ -567,6 +567,7 @@ var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduc
 function roadWeek(wi){
   var i=Math.max(0,wi); if(i>10) return null;
   var bt=BENCH_TOP[i],st=SQUAT_TOP[i],o={i:i,deload:i===DELOAD_WEEK};
+  /* No deload week anymore: week 9 is a normal week, same plan as the week before it. */
   if(!o.deload){if(bt==='DL')bt=BENCH_TOP[i-1];if(st==='DL')st=SQUAT_TOP[i-1];}
   if(bt==='DL'){o.benchTop={w:B0,reps:'3',sets:1,easy:true};o.benchBack={w:r5(B0*0.85),reps:'6',sets:1};o.benchVol={w:r5(B0*0.8),reps:'6',sets:1};o.benchWide={w:r5(B0*0.65),reps:'10',sets:1,easy:true};o.benchHeavy={w:r5(B0*0.9),reps:'3',sets:1,easy:true};}
   else{var b=bt||[B0,'5'];o.benchTop={w:b[0],reps:b[1],sets:1,done:!bt};o.benchBack={w:r5(b[0]*0.85),reps:'6–8',sets:3};o.benchVol={w:r5(b[0]*0.85),reps:'6–8',sets:2};o.benchWide={w:r5(b[0]*0.75),reps:'10–12',sets:1};o.benchHeavy={w:b[0]-10,reps:'3',sets:1};if(i===10)o.benchTop.extra='If '+b[0]+' lbs flies up, try '+(b[0]+10)+' lbs × 1–3 with a spotter.';}
