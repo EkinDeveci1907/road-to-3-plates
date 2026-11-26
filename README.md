@@ -39,6 +39,7 @@ Side delts get three days (Mon, Thu, Fri) because they were the one muscle under
 - All seven days across the top, opens on today. Tue, Sat and Sun are rest days: a rest page (eat, sleep, chill) that says what's next, offers "Train anyway", and keeps a missed day open until Sunday ("Do Lower B today").
 - Mon/Wed/Thu/Fri dots fill in as the week goes. Swipe left or right to move between days.
 - A finished exercise folds to one line. Once a workout is saved the bar says "Workout done" with a Review button.
+- Left open in the background and opened again on a new day, Today moves to that day (v5.8). A workout you're still logging past midnight stays on screen with its own date.
 - Rest timer: silent. When rest is over it shows "Go" and highlights the next set (no beep).
 - Progress: weight-gain pace from weekly weigh-in averages, and a 315 countdown from the heavy-bench chain.
 
@@ -107,4 +108,5 @@ classDiagram
 ```
 
 A session's `id` is `date-key` (e.g. `2026-11-18-lowerA`; old-plan workouts use `old`). `w` is pounds (`null` or `0` is bodyweight), `r` is reps.
+A saved entry the app can't read is copied to `<key>.unreadable` before anything could replace it, and the app says so.
 Restoring never deletes anything: a workout from a backup only comes in if the phone doesn't have it (or, for the JSON backup, if the backup's copy was saved later).

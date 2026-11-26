@@ -565,9 +565,11 @@ function e1rm(w,r){return r<=1?w:w*(1+r/30)}
 function num(v){var n=parseFloat(String(v).replace(',','.'));return isFinite(n)?n:null}
 function fmtRest(s){var m=Math.floor(s/60),x=s%60;return m?(x?m+':'+pad(x):m+':00'):'0:'+pad(s)}
 function lbs(n){return Math.round(n).toLocaleString('en-CA')}
-var LS={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
+/* A saved entry that can't be read (damaged) is copied to <key>.unreadable before anything can replace it. */
+var LS={bad:false,get:function(k,d){var v=null;try{v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){LS.keep(k,v);return d}},
+ keep:function(k,v){if(v==null)return;LS.bad=true;try{if(localStorage.getItem(k+'.unreadable')==null)localStorage.setItem(k+'.unreadable',v);}catch(e){/* phone storage full: nothing more we can do here */}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:P+'.drafts',sessions:P+'.sessions',bw:P+'.bw',checks:P+'.checks',seeded:P+'.seeded',hint:P+'.hideInstall'};
-var APP_VERSION='5.7 (Nov 23)';
+var APP_VERSION='5.8 (Nov 26)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
@@ -1514,6 +1516,7 @@ function doSave(){
   if(!prs&&prior&&d.saved)prs=prior.prs||0;   // editing a saved workout keeps its new-best count
   var sess={id:id,date:d.date,key:w.key,title:w.name,plan:'new',week:weekIndex(d.date)+1,exercises:exs,prs:prs,mins:mins||null,savedAt:Date.now()};
   S.sessions=S.sessions.filter(function(x){return x.id!==id}).concat([sess]);if(!persist())return;
+  tombDel(id);   // saved again after an undo or a delete: the sheet must keep it
   S.undo={id:id,prior:prior,wasSaved:!!d.saved};d.saved=true;d.snap=sessSig(d.date,exs);saveDrafts();stopTimer();syncCloud();SC.scrollTop=0;renderToday();toast(prior?'Changes saved':w.name+' saved');
 }
 function undoSave(w,d){var id=d.date+'-'+w.key,u=S.undo&&S.undo.id===id?S.undo:null;S.sessions=S.sessions.filter(function(x){return x.id!==id});if(u&&u.prior){u.prior.savedAt=Date.now();S.sessions.push(u.prior);}else tombAdd(id);persist();d.saved=u?u.wasSaved:false;delete d.snap;saveDrafts();S.undo=null;keepScroll(renderToday);syncCloud();toast('Save undone. Your sets are still here.');}
@@ -1554,7 +1557,22 @@ function cloudCard(){var u=cloudUrl(),at=LS.get(P+'.cloudAt',0),top='<div style=
    to check them one at a time. On a phone it is never set, so this does nothing. */
 if(typeof window.R3P_TEST==='function')window.R3P_TEST({e1rm:e1rm,plusFive:plusFive,weekIndex:weekIndex,workout:workout,lastWorking:lastWorking,lastDone:lastDone,
   recommend:recommend,resolveEx:resolveEx,phWeight:phWeight,toCsv:toCsv,sessionsFromCsv:sessionsFromCsv,mergeSessions:mergeSessions,state:function(){return S;}});
+/* The phone keeps the app open in the background, so it often comes back hours later without reloading.
+   On a new day Today moves to that day's workout (or rest day), unless a workout is being logged right now:
+   a late session that runs past midnight stays on screen with its own date. */
+var SHOWN_DAY=todayStr();
+function onNewDay(){
+  var t=todayStr();if(t===SHOWN_DAY)return;
+  var w=workout(S.activeKey),d=S.drafts[w.key],busy=S.restDay==null&&!!d&&(hasUnsaved(w,d)||(!!d.startedAt&&!d.saved));
+  if(busy)return;   // checked again next time the app comes back
+  SHOWN_DAY=t;
+  S.activeKey=defaultKey();S.restDay=defaultRest();S.openEx={};S.swapOpen=null;S.addOpen=false;S.calSel=null;S.calMonth=null;
+  render();SC.scrollTop=0;
+}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')onNewDay();});
+window.addEventListener('pageshow',onNewDay);
 render();
+if(LS.bad)toast('Some saved data on this phone couldn\u2019t be read. It was kept, untouched, as a separate copy. Back up now (Settings).','',null,8000);
 if(CFG.seed)syncSheet();
 syncCloud();
 })();
