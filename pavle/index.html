@@ -254,7 +254,7 @@ h1{font-size:30px;line-height:1.15;font-weight:700;letter-spacing:-.02em;margin:
 .finish__meta .ok-sub{display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sum-btns .link{justify-self:center}
 .tabs{position:relative;flex:none;z-index:7;background:var(--bg);border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom,0px)}
-.tabs ul{list-style:none;margin:0 auto;padding:0;max-width:520px;display:grid;grid-template-columns:repeat(4,1fr);height:var(--tab)}
+.tabs ul{list-style:none;margin:0 auto;padding:0;max-width:520px;display:grid;grid-template-columns:repeat(5,1fr);height:var(--tab)}
 .tabs button{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--tx3);font-size:10px;font-weight:600;border-radius:0}
 .tabs button:active{transform:none}
 .tabs svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;transition:transform var(--med) var(--ease)}
@@ -383,6 +383,20 @@ body.setup .tabs,body.setup .gear{display:none}
 .wsum b{display:block;font-size:24px;font-weight:700;letter-spacing:-.02em}
 .wsum span{font-size:12px;color:var(--tx3)}
 .delta{grid-column:1 / -1;margin:6px 0 0;font-size:13px;color:var(--tx2)}
+/* ---------- stats ---------- */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.tiles div{background:var(--sf2);border-radius:var(--rc);padding:10px 12px;min-width:0}
+.tiles b{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tiles span{font-size:12px;color:var(--tx3)}
+small.up,small.down{font-size:12px;font-weight:600;margin-left:5px;letter-spacing:0}small.up{color:var(--ac)}small.down{color:var(--red)}
+.tiles small.up,.tiles small.down{display:block;margin:2px 0 0}.tiles small.u{font-size:13px;color:var(--tx3);font-weight:600}
+.rows small.sub{display:block;font-size:12px;color:var(--tx3);font-weight:400;line-height:1.3}
+.rows li span:first-child{padding:7px 0}
+.mrows{list-style:none;margin:12px 0 0;padding:0}
+.mrows li{display:grid;grid-template-columns:74px 1fr 24px 52px;gap:10px;align-items:center;min-height:34px;font-size:14px}
+.mrows .m{color:var(--tx2)}.mrows .n{text-align:right;font-weight:600}.mrows .a{text-align:right;font-size:12px;color:var(--tx3)}
+.mrows .mbar{height:8px;background:var(--sf3);border-radius:4px;overflow:hidden}
+.mrows .mbar i{display:block;height:100%;background:var(--tx3);border-radius:4px;transition:width var(--slow) var(--ease)}.mrows .mbar i.hit{background:var(--ac)}
 @media (max-width:360px){.card{padding:16px}.hero .loop{margin:-16px -16px 16px}.ex__inner{padding:0 16px 16px}.sethead,.set{grid-template-columns:12px minmax(0,1.3fr) minmax(0,1fr) 40px;gap:6px}.step{grid-template-columns:26px minmax(0,1fr) 26px}.step input{font-size:17px}.check{width:40px;height:40px}.ex__head{grid-template-columns:1fr 20px;padding:14px 14px 14px 16px}.ex__tg{grid-column:1;grid-row:auto;text-align:left;margin-top:2px}.ex__tg small{display:inline;margin-left:6px}.ex__chev{grid-column:2;grid-row:1 / span 3}}
 .rot{display:none;position:fixed;inset:0;z-index:50;background:var(--bg);color:var(--tx);align-items:center;justify-content:center;text-align:center;padding:24px;font-size:17px;font-weight:600}
 .rot small{display:block;margin-top:6px;color:var(--tx2);font-size:14px;font-weight:400}
@@ -441,6 +455,7 @@ main.in-l .enter,main.in-r .enter{animation:none}
 </div>
 <nav class="tabs" aria-label="Sections"><ul>
   <li><button type="button" data-tab="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7v10M3.5 9.5v5M17.5 7v10M20.5 9.5v5M6.5 12h11"/></svg>Today</button></li>
+  <li><button type="button" data-tab="stats"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16M7 16v-5M12 16V6M17 16v-8"/></svg>Stats</button></li>
   <li><button type="button" data-tab="progress"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Progress</button></li>
   <li><button type="button" data-tab="history"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>Calendar</button></li>
   <li><button type="button" data-tab="food"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"/><path d="M9 8c0-1.6 1.2-2.2 1.2-4M13.5 8c0-1.6 1.2-2.2 1.2-4"/></svg>Food</button></li>
@@ -562,7 +577,7 @@ function lbs(n){return Math.round(n).toLocaleString('en-CA')}
 var LS={bad:false,get:function(k,d){var v=null;try{v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){LS.keep(k,v);return d}},
  keep:function(k,v){if(v==null)return;LS.bad=true;try{if(localStorage.getItem(k+'.unreadable')==null)localStorage.setItem(k+'.unreadable',v);}catch(e){/* phone storage full: nothing more we can do here */}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 var K={drafts:P+'.drafts',sessions:P+'.sessions',bw:P+'.bw',checks:P+'.checks',seeded:P+'.seeded',hint:P+'.hideInstall'};
-var APP_VERSION='5.8 (Nov 26)';
+var APP_VERSION='5.9 (Nov 26)';
 var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================= targets ================= */
@@ -895,6 +910,7 @@ function tipHtml(){
   if(!standalone&&/iPhone|iPad|iPod/.test(navigator.userAgent)&&!LS.get(K.hint,false))return '<div class="tip"><p>Tap Share, then <b>Add to Home Screen</b>. Open it from that icon and it runs full screen, with no Safari bar.</p><button type="button" data-act="hidehint" aria-label="Dismiss tip">×</button></div>';
   var pn=LS.get(P+'.planNote','');
   if(pn!=='5.6'&&S.sessions.some(function(s){return s.date<'2026-11-18'}))return '<div class="tip"><p><b>Updated plan.</b> '+(pn!=='5.3'&&S.sessions.some(function(s){return s.date<'2026-11-17'})?'New exercise order so you’re fresh for the hard lifts. Shoulder press is first on Friday, with cable lateral raises after it. New: overhead rope extension and reverse pec deck (Mon), dumbbell RDL (Wed), rope face pull (Thu). Decline sit-ups (Wed and Fri) are with the plate behind your head. Small arm and shoulder lifts now go up 5 lbs once every set hits the top reps. ':'')+'Wednesday’s RDL is barbell again (use straps). New on Thursday: low-to-high cable fly right after dips, and the Bayesian cable curl in place of the hammer curl. Monday’s cable fly is 2 sets. Restore (Settings) now also takes your CSV export.</p><button type="button" data-act="hideplan" aria-label="Dismiss plan note">×</button></div>';
+  if(!LS.get(P+'.tipStats',false)&&S.sessions.length)return '<div class="tip"><p><b>New: Stats.</b> Your workouts, sets, weight moved, weeks in a row, sets per muscle and strength trends, from what’s on this phone. <button type="button" class="link" data-act="gostats" style="display:inline;min-height:0;font-weight:600">Open Stats</button></p><button type="button" data-act="hidestats" aria-label="Dismiss Stats tip">×</button></div>';
   return '';
 }
 function daySeg(){return segHtml(DAYS.map(function(dn){var k=SCHED[dn];return [String(dn),DSHORT[dn],k?CODE[k]:'rest']}),String(curDay()),'data-day','seg--days');}
@@ -1160,6 +1176,150 @@ function renderHistory(){
   h+='<section class="card wsum" aria-label="Week totals"><p class="eyebrow" style="grid-column:1 / -1;margin-bottom:4px">Week of '+esc(a.toLocaleDateString('en-CA',{month:'short',day:'numeric'}))+'</p><div><b class="num">'+T.n+'</b><span>workout'+(T.n===1?'':'s')+'</span></div><div><b class="num">'+T.sets+'</b><span>sets</span></div><div><b class="num">'+lbs(T.vol)+'</b><span>lbs moved</span></div>'+(dl?'<p class="delta">'+esc(dl)+'</p>':'')+'</section>';
   h+='</div>';main.innerHTML=h;
 }
+/* ================= stats ================= */
+/* Read-only numbers from what's saved on this phone: workouts, sets, weight moved, consistency, sets per muscle,
+   strength trends, bests, body weight and food. Nothing here is ever saved, so it can't change anyone's data. */
+var MUSCLES=['Chest','Back','Shoulders','Biceps','Triceps','Legs','Calves','Abs'],SET_GOAL=10;
+/* Which muscle an exercise counts for. Order matters: "leg curl" is legs, not biceps; "back extension" is back, not triceps. */
+var MUSCLE_RULES=[['Calves',/calf/i],['Abs',/crunch|sit-up|leg raise|knee raise|dragon|plank|rollout|woodchop|pallof/i],
+  ['Legs',/leg curl|romanian|deadlift|hip thrust|abduct|adduct|squat|leg extension|leg press|lunge|glute|sissy/i],
+  ['Back',/back extension|hyperextension|shrug|row|pull-?up|pull ?down|lat /i],['Shoulders',/reverse pec|rear delt|face pull|lateral|shoulder press|overhead press/i],
+  ['Triceps',/tricep|skull|pushdown|extension/i],['Biceps',/curl/i],['Chest',/bench|fly|pec|dip|chest|press/i]];
+function muscleOf(name){for(var i=0;i<MUSCLE_RULES.length;i++)if(MUSCLE_RULES[i][1].test(name))return MUSCLE_RULES[i][0];return 'Other';}
+function canonName(n){return /^Bench press/.test(n)?'Bench press':/^Squat/.test(n)?'Squat':n;}
+function addDays(ds,n){var d=parseYmd(ds);d.setDate(d.getDate()+n);return ymd(d);}
+function inSpan(s,from,to){return s.date>=from&&s.date<=to;}
+function firstDay(){var a=S.sessions.map(function(s){return s.date}).sort();return a.length?a[0]:todayStr();}
+/* The span a range covers, ending today, and the same length just before it (for "vs before"). */
+function statSpan(r,t){
+  var mon=ymd(mondayOf(parseYmd(t)));
+  if(r==='all')return {from:firstDay(),to:t,label:'All time',weeks:Math.max(1,Math.ceil((Math.round((parseYmd(t)-parseYmd(firstDay()))/DAY)+1)/7))};
+  var n=r==='12w'?12:4,from=addDays(mon,-7*(n-1)),prevFrom=addDays(from,-7*n);
+  // "vs before" covers the same days: this week is only part done, so it's compared with the same weekdays back then
+  return {from:from,to:t,prevFrom:prevFrom,prevTo:addDays(t,-7*n),label:'Last '+n+' weeks',weeks:n};
+}
+function statTotals(from,to){
+  var o={workouts:0,sets:0,vol:0,mins:0,timed:0,prs:0,days:{}};
+  S.sessions.forEach(function(s){if(!inSpan(s,from,to))return;
+    // only sets with reps count: a skipped exercise logged as 0 x 0 is not a set
+    (s.exercises||[]).forEach(function(e){(e.sets||[]).forEach(function(x){if(!(+x.r>0))return;o.sets++;if(x.w>0)o.vol+=x.w*x.r;});});
+    o.workouts++;o.prs+=s.prs||0;o.days[s.date]=1;if(s.mins>0){o.mins+=s.mins;o.timed++;}});
+  o.avgMins=o.timed?Math.round(o.mins/o.timed):0;o.days=Object.keys(o.days).length;return o;
+}
+/* Monday-to-Sunday weeks, oldest first: weight moved and workouts in each. */
+function weekBuckets(n,t){
+  var mon=ymd(mondayOf(parseYmd(t))),out=[];
+  for(var i=n-1;i>=0;i--){var a=addDays(mon,-7*i),b=addDays(a,6),tt=statTotals(a,b>t?t:b);out.push({mon:a,vol:tt.vol,workouts:tt.workouts,sets:tt.sets,now:i===0});}
+  return out;
+}
+/* How many of the week's planned workouts got done (old-plan workouts count one each), per Monday. */
+function weekCount(mon){var b=addDays(mon,6),keys={},old=0;S.sessions.forEach(function(s){if(!inSpan(s,mon,b))return;if(s.key==='old'||!WORKOUTS.some(function(x){return x.key===s.key}))old++;else keys[s.key]=1;});
+  return Math.min(WORKOUTS.length,Object.keys(keys).length+old);}
+function showingUp(t){
+  var mon=ymd(mondayOf(parseYmd(t))),start=ymd(mondayOf(parseYmd(joinedStr()<firstDay()?joinedStr():firstDay()))),weeks=[],per={};
+  for(var m=start;m<mon;m=addDays(m,7))weeks.push({mon:m,n:weekCount(m)});
+  var thisWeek=weekCount(mon),inRow=thisWeek>0?1:0,full=0,i;
+  for(i=weeks.length-1;i>=0&&weeks[i].n>0;i--)inRow++;
+  for(i=weeks.length-1;i>=0&&weeks[i].n>=WORKOUTS.length;i--)full++;
+  var last=weeks.slice(-8),done=last.reduce(function(a,w){return a+w.n},0),planned=last.length*WORKOUTS.length;
+  WORKOUTS.forEach(function(x){per[x.key]={name:x.name,day:x.day,done:0,of:last.length};});
+  last.forEach(function(w){var b=addDays(w.mon,6);WORKOUTS.forEach(function(x){if(S.sessions.some(function(s){return s.key===x.key&&inSpan(s,w.mon,b)}))per[x.key].done++;});});
+  return {thisWeek:thisWeek,inRow:inRow,fullInRow:full,done:done,planned:planned,weeks:last.length,per:WORKOUTS.map(function(x){return per[x.key]})};
+}
+/* Sets that got at least one rep, per muscle */
+function muscleSets(from,to){
+  var o={};MUSCLES.forEach(function(m){o[m]=0;});
+  S.sessions.forEach(function(s){if(!inSpan(s,from,to))return;(s.exercises||[]).forEach(function(e){var m=muscleOf(e.name),n=(e.sets||[]).filter(function(x){return +x.r>0}).length;if(m!=='Other')o[m]+=n;});});
+  return o;
+}
+/* Best estimated max per exercise (weighted lifts only), with the day it was set */
+function bestsBy(from,to){
+  var o={};S.sessions.forEach(function(s){if(!inSpan(s,from,to))return;(s.exercises||[]).forEach(function(e){if(isBwName(e.name))return;var n=canonName(e.name);
+    (e.sets||[]).forEach(function(x){if(!(x.w>0&&x.r>2))return;var v=e1rm(+x.w,+x.r);if(!o[n]||v>o[n].v)o[n]={v:v,w:+x.w,r:+x.r,date:s.date,name:n};});});});
+  return o;
+}
+/* The main lifts: best estimated max in the last 4 weeks vs the 4 weeks before */
+var KEY_LIFTS=['Bench press','Squat','Romanian deadlift','Hip thrust','Barbell row','Lat pulldown','Incline DB press','Leg extension'];
+function liftTrend(t){
+  var mon=ymd(mondayOf(parseYmd(t))),a=addDays(mon,-21),now=bestsBy(a,t),before=bestsBy(addDays(a,-28),addDays(a,-1));
+  return KEY_LIFTS.filter(function(n){return now[n]}).map(function(n){return {name:n,now:now[n],change:before[n]?Math.round(now[n].v-before[n].v):null};});
+}
+/* Biggest gains since the first time you logged it (needs 3+ weeks between first and last) */
+function mostImproved(n){
+  var first={},last={};sorted().slice().reverse().forEach(function(s){(s.exercises||[]).forEach(function(e){if(isBwName(e.name))return;var nm=canonName(e.name),b=bestSet(e.sets);if(!b||!(b.r>2))return;
+    var v=e1rm(+b.w,+b.r);if(!first[nm])first[nm]={v:v,date:s.date};if(!last[nm]||s.date>last[nm].date||(s.date===last[nm].date&&v>last[nm].v))last[nm]={v:v,date:s.date};});});
+  return Object.keys(first).filter(function(k){return (parseYmd(last[k].date)-parseYmd(first[k].date))/DAY>=21&&last[k].v>first[k].v;})
+    .map(function(k){return {name:k,from:Math.round(first[k].v),to:Math.round(last[k].v),pct:Math.round((last[k].v/first[k].v-1)*100),since:first[k].date};})
+    .sort(function(x,y){return y.pct-x.pct}).slice(0,n);
+}
+function recentBests(n){var all=bestsBy('0000-00-00','9999-12-31');return Object.keys(all).map(function(k){return all[k]}).sort(function(x,y){return x.date<y.date?1:x.date>y.date?-1:y.v-x.v}).slice(0,n);}
+function proteinStats(t,days){
+  var lb=latestBw(),goal=nutrition(lb?lb.lbs:BWG-15).p,logged=0,sum=0,hit=0,cre=0,i;
+  for(i=0;i<days;i++){var d=S.checks[addDays(t,-i)]||{};if(d.protein>0){logged++;sum+=d.protein;if(d.protein>=goal)hit++;}}
+  for(i=0;i<90;i++){var c=S.checks[addDays(t,-i)]||{};if(c.creatine)cre++;else if(i>0)break;}
+  return {goal:goal,logged:logged,avg:logged?Math.round(sum/logged):0,hit:hit,days:days,creatine:cre};
+}
+function pctChange(a,b){return b>0?Math.round((a-b)/b*100):null;}
+function deltaTxt(a,b){var p=pctChange(a,b);return p==null?'':'<small class="'+(p>=0?'up':'down')+'">'+(p>=0?'+':'')+p+'%</small>';}
+function kLbs(n){return n>=100000?Math.round(n/1000)+'k':lbs(n);}
+function tile(label,val,extra){return '<div><b class="num">'+val+(extra||'')+'</b><span>'+esc(label)+'</span></div>';}
+function volBars(weeks){
+  var W=340,H=120,T=14,B=20,max=Math.max.apply(null,weeks.map(function(w){return w.vol}).concat([1])),bw=(W-(weeks.length-1)*6)/weeks.length;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Weight moved each week">';
+  weeks.forEach(function(w,i){var h=Math.round((H-T-B)*w.vol/max),x=Math.round(i*(bw+6)),y=H-B-h;
+    s+='<rect x="'+x+'" y="'+y+'" width="'+Math.floor(bw)+'" height="'+Math.max(h,w.vol?2:0)+'" rx="3" fill="'+(w.now?'var(--ac)':'var(--sf3)')+'"/>';
+    if(i===0||i===weeks.length-1||w.now)s+='<text x="'+(x+bw/2)+'" y="'+(H-5)+'" font-size="10" text-anchor="middle" fill="var(--tx3)">'+esc(w.now?'Now':fmt(w.mon))+'</text>';});
+  return '<div class="chart">'+s+'</svg></div>';
+}
+function statsEmpty(){return '<section class="card"><h2>Nothing logged yet</h2><p class="fine">Your stats fill in as you log workouts on Today.</p></section>';}
+function totalsCard(sp){
+  var cur=statTotals(sp.from,sp.to),prev=sp.prevFrom?statTotals(sp.prevFrom,sp.prevTo):null,d=function(k){return prev?deltaTxt(cur[k],prev[k]):'';};
+  return '<section class="card" aria-labelledby="st-h"><h2 id="st-h" class="eyebrow">'+esc(sp.label)+' · '+esc(fmt(sp.from))+' to today</h2><div class="tiles">'+
+    tile('workouts',cur.workouts,d('workouts'))+tile('sets',cur.sets,d('sets'))+tile('lbs moved',kLbs(cur.vol),d('vol'))+
+    tile('hours',Math.round(cur.mins/60*10)/10)+tile('avg workout',cur.avgMins?cur.avgMins+'<small class="u"> min</small>':'–')+tile('new bests',cur.prs)+'</div>'+
+    (prev?'<p class="fine">Changes are against the '+sp.weeks+' weeks before, up to the same weekday.</p>':'')+'</section>';
+}
+function weeksCard(r,sp,t){
+  var wk=weekBuckets(r==='12w'?12:r==='all'?Math.min(26,sp.weeks):8,t),best=wk.reduce(function(a,w){return w.vol>a.vol?w:a},wk[0]),nowW=wk[wk.length-1];
+  return '<section class="card" aria-labelledby="wv-h"><h2 id="wv-h">Every week</h2><p class="eyebrow" style="margin-top:4px">Weight moved, Monday to Sunday</p>'+volBars(wk)+
+    '<p class="fine">This week so far: <b>'+lbs(nowW.vol)+' lbs</b> in '+nowW.workouts+' workout'+(nowW.workouts===1?'':'s')+'. Best week: '+lbs(best.vol)+' lbs (week of '+esc(fmt(best.mon))+').</p></section>';
+}
+function showingCard(t){
+  var su=showingUp(t),pct=su.planned?Math.round(su.done/su.planned*100):0,h='<section class="card" aria-labelledby="su-h"><h2 id="su-h" class="eyebrow">Showing up</h2><div class="big"><span class="w num">'+su.inRow+'</span><span>week'+(su.inRow===1?'':'s')+' in a row with a workout</span></div>';
+  if(su.weeks)h+='<div class="meter" role="progressbar" aria-label="Workouts done" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div><p class="fine" style="margin-top:8px">'+su.done+' of '+su.planned+' planned workouts in the last '+su.weeks+' full week'+(su.weeks===1?'':'s')+' ('+pct+'%). All '+WORKOUTS.length+' done: '+su.fullInRow+' week'+(su.fullInRow===1?'':'s')+' in a row.</p>';
+  h+='<ul class="rows"><li><span>This week</span><span>'+su.thisWeek+' of '+WORKOUTS.length+'</span></li>';
+  if(su.weeks)h+=su.per.map(function(p){return '<li><span>'+esc(p.name)+' · '+esc(p.day)+'</span><span>'+p.done+' of '+p.of+' weeks</span></li>'}).join('');
+  return h+'</ul></section>';
+}
+function muscleCard(sp,t){
+  var ms=muscleSets(ymd(mondayOf(parseYmd(t))),t),avg=muscleSets(sp.from,sp.to),fw=Math.max(1,sp.weeks);
+  return '<section class="card" aria-labelledby="ms-h"><h2 id="ms-h">Sets per muscle</h2><p class="eyebrow" style="margin-top:4px">This week, against '+SET_GOAL+' hard sets a week</p><ul class="mrows">'+
+    MUSCLES.map(function(m){var n=ms[m],w=Math.min(100,n/SET_GOAL*100),a=Math.round(avg[m]/fw*10)/10;return '<li><span class="m">'+m+'</span><span class="mbar"><i style="width:'+w+'%"'+(n>=SET_GOAL?' class="hit"':'')+'></i></span><span class="n num">'+n+'</span><span class="a num">avg '+a+'</span></li>';}).join('')+
+    '</ul><p class="fine">A hard set is any set you logged with reps. “avg” is per week over the '+esc(sp.label.toLowerCase().replace('last ',''))+'. About 10 or more a week per muscle is the usual target for growth.</p></section>';
+}
+function listCard(id,title,sub,items){if(!items.length)return '';return '<section class="card" aria-labelledby="'+id+'"><h2 id="'+id+'">'+esc(title)+'</h2><p class="eyebrow" style="margin-top:4px">'+esc(sub)+'</p><ul class="rows">'+items.join('')+'</ul></section>';}
+function liftsCards(t){
+  var sign=function(n){return '<small class="'+(n>=0?'up':'down')+'">'+(n>=0?'+':'')+n+'</small>';};
+  return listCard('lt-h','Getting stronger','Estimated max, last 4 weeks vs the 4 before',liftTrend(t).map(function(x){return '<li><span>'+esc(x.name)+'<small class="sub">'+esc(x.now.w+' × '+x.now.r+' · '+fmt(x.now.date))+'</small></span><span class="num">'+Math.round(x.now.v)+' lbs'+(x.change!=null?' '+sign(x.change):'')+'</span></li>';}))+
+    listCard('mi-h','Most improved','Estimated max, first time you logged it vs now',mostImproved(5).map(function(x){return '<li><span>'+esc(x.name)+'<small class="sub">'+x.from+' → '+x.to+' lbs since '+esc(fmt(x.since))+'</small></span><span class="num"><small class="up">+'+x.pct+'%</small></span></li>';}))+
+    listCard('rb2-h','Latest bests','Your best set ever, newest first',recentBests(5).map(function(x){return '<li><span>'+esc(x.name)+'<small class="sub">'+esc(fmt(x.date,{weekday:'short',month:'short',day:'numeric'}))+'</small></span><span class="num">'+esc(x.w+' × '+x.r)+'</span></li>';}));
+}
+function bodyCard(sp,t){
+  var lb=latestBw(),p=proteinStats(t,7),bw=S.bw.filter(function(e){return e&&e.date>=sp.from&&e.lbs>0}).sort(function(a,b){return a.date<b.date?-1:1}),pace=bwPace(),ch=bw.length>1?Math.round((bw[bw.length-1].lbs-bw[0].lbs)*10)/10:null;
+  return '<section class="card" aria-labelledby="bf-h"><h2 id="bf-h">Body and food</h2><ul class="rows">'+
+    '<li><span>Body weight</span><span class="num">'+(lb?lb.lbs+' lbs':'–')+(ch!=null?' <small class="'+(ch>=0?'up':'down')+'">'+(ch>=0?'+':'')+ch+'</small>':'')+'</span></li>'+
+    (pace&&pace.rate!=null?'<li><span>Gain pace</span><span class="num">'+(pace.rate>0?'+':'')+pace.rate+' lbs a week</span></li>':'')+
+    '<li><span>Protein, last 7 days</span><span class="num">'+(p.logged?p.avg+' g a day':'not logged')+'</span></li>'+
+    '<li><span>Days at '+p.goal+' g</span><span class="num">'+p.hit+' of 7</span></li>'+
+    '<li><span>Creatine streak</span><span class="num">'+p.creatine+' day'+(p.creatine===1?'':'s')+'</span></li></ul>'+
+    '<p class="fine">Weigh-ins are on Progress, protein and supplements on Food.</p></section>';
+}
+function renderStats(){
+  renderWeeks(todayStr());var t=todayStr(),r=S.statRange||'4w',sp=statSpan(r,t);
+  var h='<div class="enter"><div class="pagehead"><h1>Stats</h1><p class="about">Everything logged on this phone.</p></div>'+segHtml([['4w','4 weeks'],['12w','12 weeks'],['all','All time']],r,'data-sr');
+  h+=S.sessions.length?totalsCard(sp)+weeksCard(r,sp,t)+showingCard(t)+muscleCard(sp,t)+liftsCards(t)+bodyCard(sp,t):statsEmpty();
+  main.innerHTML=h+'</div>';
+}
 function planLine(){return 'Your numbers: bench '+B0+' \u00b7 squat '+S0+' \u00b7 '+ftIn(HT)+' \u00b7 goal '+BWG+' lbs. Plan started '+esc(PLAN_START.toLocaleDateString('en-CA',{month:'long',day:'numeric'}))+' · 11 weeks · goal: bench 315 lbs.';}
 function ftIn(inches){var f=Math.floor(inches/12),i=Math.round(inches-f*12);if(i===12){f++;i=0;}return f+'\u2032'+i+'\u2033';}
 function numField(id,label,ph,val,extra){return '<label class="flabel" for="'+id+'">'+label+'</label><input class="field" id="'+id+'" inputmode="decimal" placeholder="'+esc(ph)+'" value="'+(val==null?'':esc(val))+'"'+(extra||'')+'>';}
@@ -1244,7 +1404,7 @@ function editSession(id){
   d.snap=sessSig(d.date,draftSession(w,d).exs);S.drafts[w.key]=d;saveDrafts();S.activeKey=w.key;S.restDay=null;S.openEx={};S.tab='today';render();SC.scrollTop=0;
   toast('Editing '+w.name+' from '+fmt(s.date)+'. Change anything and Save changes shows up.');
 }
-function render(){if(CFG.setup&&!PROF){renderSetup();return;}document.body.classList.remove('setup');var v=S.view||S.tab;document.body.classList.toggle('in-settings',v==='settings');document.querySelectorAll('.tabs button').forEach(function(b){if(b.dataset.tab===S.tab&&!S.view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});({today:renderToday,progress:renderProgress,history:renderHistory,food:renderFood,settings:renderSettings})[v]();if(v!=='today')updateFinish();countUp();}
+function render(){if(CFG.setup&&!PROF){renderSetup();return;}document.body.classList.remove('setup');var v=S.view||S.tab;document.body.classList.toggle('in-settings',v==='settings');document.querySelectorAll('.tabs button').forEach(function(b){if(b.dataset.tab===S.tab&&!S.view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});({today:renderToday,stats:renderStats,progress:renderProgress,history:renderHistory,food:renderFood,settings:renderSettings})[v]();if(v!=='today')updateFinish();countUp();}
 var swapT=null;
 function swapView(dir,fn){closeSheet();if(reduced||!main.firstChild){fn();SC.scrollTop=0;return;}
   ghost.innerHTML=main.innerHTML;ghost.style.top=(main.offsetTop-SC.scrollTop)+'px';ghost.className='ghost out-'+dir;
@@ -1252,7 +1412,7 @@ function swapView(dir,fn){closeSheet();if(reduced||!main.firstChild){fn();SC.scr
   clearTimeout(swapT);swapT=setTimeout(function(){ghost.innerHTML='';ghost.className='ghost';main.className='';},320);}
 function openSettings(){if(S.view==='settings')return;S.view='settings';S.swapOpen=null;S.addOpen=false;swapView('l',render);main.focus({preventScroll:true});}
 function closeSettings(){S.view=null;swapView('r',render);main.focus({preventScroll:true});}
-var TABS=['today','progress','history','food'];
+var TABS=['today','stats','progress','history','food'];
 function countUp(){if(reduced)return;main.querySelectorAll('[data-count]').forEach(function(el){var to=+el.dataset.count,t0=performance.now(),dur=650;if(!(to>0))return;function f(t){var k=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e).toLocaleString('en-CA');if(k<1)requestAnimationFrame(f);}requestAnimationFrame(f);});}
 function keepScroll(fn){var y=SC.scrollTop;fn();SC.scrollTop=y}
 function refocus(sel){var el=main.querySelector(sel);if(el)el.focus({preventScroll:true});}
@@ -1329,6 +1489,9 @@ main.addEventListener('click',function(ev){
   if(act==='trainanyway'){S.restDay=null;S.activeKey=b.dataset.wk||defaultKey();S.openEx={};swapView('l',renderToday);return;}
   if(act==='gofood'){S.tab='food';swapView('l',render);return;}
   if(b.dataset.pv){if(b.dataset.pv===S.progView)return;S.progView=b.dataset.pv;slideSeg(b,renderProgress);return;}
+  if(b.dataset.sr){if(b.dataset.sr===(S.statRange||'4w'))return;S.statRange=b.dataset.sr;slideSeg(b,renderStats);return;}
+  if(act==='hidestats'){LS.set(P+'.tipStats',true);keepScroll(renderToday);return;}
+  if(act==='gostats'){LS.set(P+'.tipStats',true);S.tab='stats';swapView('l',render);return;}
   if(act==='cloudshow'){S.cloudOpen=true;keepScroll(render);refocus('#cloudIn');return;}if(act==='cloudon'){cloudConnect();return;}if(act==='cloudoff'){LS.set(P+'.cloudUrl','');CLD.err='';keepScroll(render);toast('Sync turned off. Your workouts stay on this phone.');return;}if(act==='cloudsync'){syncCloud(true);return;}
   if(act==='backup'){
     // "Last backup" only changes once the file was actually saved or shared, not if the share sheet is cancelled
@@ -1549,7 +1712,8 @@ function cloudCard(){var u=cloudUrl(),at=LS.get(P+'.cloudAt',0),top='<div style=
 /* Test hook. The automated tests in tests/ open the page with window.R3P_TEST set and get these functions
    to check them one at a time. On a phone it is never set, so this does nothing. */
 if(typeof window.R3P_TEST==='function')window.R3P_TEST({e1rm:e1rm,plusFive:plusFive,weekIndex:weekIndex,workout:workout,lastWorking:lastWorking,lastDone:lastDone,
-  recommend:recommend,resolveEx:resolveEx,phWeight:phWeight,toCsv:toCsv,sessionsFromCsv:sessionsFromCsv,mergeSessions:mergeSessions,state:function(){return S;}});
+  recommend:recommend,resolveEx:resolveEx,phWeight:phWeight,toCsv:toCsv,sessionsFromCsv:sessionsFromCsv,mergeSessions:mergeSessions,state:function(){return S;},
+  muscleOf:muscleOf,statSpan:statSpan,statTotals:statTotals,weekBuckets:weekBuckets,showingUp:showingUp,muscleSets:muscleSets,liftTrend:liftTrend,mostImproved:mostImproved,recentBests:recentBests,proteinStats:proteinStats});
 /* The phone keeps the app open in the background, so it often comes back hours later without reloading.
    On a new day Today moves to that day's workout (or rest day), unless a workout is being logged right now:
    a late session that runs past midnight stays on screen with its own date. */

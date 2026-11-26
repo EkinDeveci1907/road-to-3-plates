@@ -35,6 +35,13 @@ Side delts get three days (Mon, Thu, Fri) because they were the one muscle under
 - The Bayesian cable curl keeps its code name `Behind-the-body cable curl`, so Monday and Thursday share one history.
 - Wednesday's RDL is the barbell one (`Romanian deadlift`) and carries on from those logs. The dumbbell RDL is still a swap option with its own history, because barbell numbers are the whole bar, not one dumbbell.
 
+## Stats tab (v5.9)
+Everything logged on this phone, for 4 weeks, 12 weeks or all time. It only reads, it never saves, so it can't change anyone's data.
+- Totals: workouts, sets (0 × 0 skipped sets don't count), lbs moved, hours, average workout, new bests, each with the change against the same days before.
+- Every week: weight moved per Monday-to-Sunday week. Showing up: weeks in a row with a workout, planned workouts done in the last 8 full weeks, each workout's hit rate.
+- Sets per muscle this week against 10 hard sets, with the weekly average. Getting stronger: estimated max of the main lifts, last 4 weeks vs the 4 before. Most improved and latest bests.
+- Body and food: latest weigh-in, gain pace, protein for the last 7 days, creatine streak.
+
 ## Today tab
 - All seven days across the top, opens on today. Tue, Sat and Sun are rest days: a rest page (eat, sleep, chill) that says what's next, offers "Train anyway", and keeps a missed day open until Sunday ("Do Lower B today").
 - Mon/Wed/Thu/Fri dots fill in as the week goes. Swipe left or right to move between days.
@@ -72,6 +79,8 @@ The page gets a test hook (`window.R3P_TEST`, at the end of `index.html`) that h
 The Google Sheet file (`logs.json`) and exercise photos are stubbed out, so tests only see their own workouts.
 
 - `tests/test_targets.py`, `tests/test_plan.py` (unit): suggested weights, "last time", the weekly plan.
+- `tests/test_stats.py` (unit + system): muscle groups, totals, weeks in a row, the Stats tab in every copy.
+- `tests/test_new_day.py` (system + integration): Today on a new day, sheet sync after undo, unreadable storage.
 - `tests/test_backup.py` (integration): CSV export ↔ restore, JSON restore, never losing or duplicating a workout.
 - `tests/test_copies.py` (system): every copy opens clean, each person only sees their own workouts, logging and saving a set, an update never touches saved workouts.
 - `tests/test_build.py` (build): committed friend copies match a fresh build, no Eko data in them, the script parses, offline files exist.
