@@ -78,3 +78,28 @@ def test_an_update_never_touches_saved_workouts(open_app):
     # Assert: byte for byte the same workouts
     assert app.stored("sessions") == before
     assert app.errors == []
+
+
+@pytest.mark.system
+@pytest.mark.parametrize("copy", list(COPIES))
+def test_updating_keeps_every_friends_data_exactly(open_app, copy):
+    # Arrange: a friend's phone from the last version: workouts, weigh-ins, food checks, their numbers,
+    # and a workout typed in but not saved yet
+    before = {
+        "sessions": [workout("2026-11-23", "upperA", "Upper A", [("Bench press – top set", [(155, 5)]), ("Pull-ups", [(0, 9)], "felt good")])],
+        "bw": [{"date": "2026-11-20", "lbs": 151.5}],
+        "checks": {"2026-11-25": {"protein": 120, "creatine": True}},
+        "profile": {"bench": 155, "squat": 185, "bwGoal": 165, "heightIn": 70, "age": 21, "start": [2026, 9, 26], "joined": "2026-10-26"},
+        "drafts": {"lowerA": {"date": "2026-11-25", "created": "2026-11-25", "ex": {"Squat – top set": {"sets": [{"w": "185", "r": "5", "done": True}], "note": ""}}, "swap": {}, "extra": []}},
+    }
+
+    # Act: open the new version and go through every tab
+    app = open_app(copy, storage=dict(before, seeded=True, seedv=2), today="2026-11-26")
+    for tab in ("progress", "history", "food", "today"):
+        app.page.click(f'.tabs button[data-tab="{tab}"]')
+
+    # Assert: nothing that was saved changed
+    for key in ("sessions", "bw", "checks", "profile"):
+        assert app.stored(key) == before[key], key
+    assert app.stored("drafts")["lowerA"]["ex"] == before["drafts"]["lowerA"]["ex"]
+    assert app.errors == []
