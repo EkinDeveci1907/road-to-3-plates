@@ -11,7 +11,7 @@ Logs are saved on the phone. Settings (gear) → Back up now keeps a copy; Resto
 - Shayan: https://ekindeveci1907.github.io/road-to-3-plates/shayan/ (folder `shayan/` in this repo)
 - Pavle: https://ekindeveci1907.github.io/road-to-3-plates/pavle/ (folder `pavle/` in this repo)
 
-## The plan (v5.6)
+## The plan (v5.10)
 Mon Upper A, Wed Lower A, Thu Upper B, Fri Lower B: every muscle twice a week. Big compound lifts get 2–3 hard sets of 6–8; isolation work gets 2–3 sets.
 Bench keeps 4–5 sets: Monday top set + 3 back-off sets + 1 wide-grip set; Thursday heavy set + 2 volume sets + 1 wide-grip set.
 The wide-grip set is always the last bench set: lighter, 10–12 reps.
@@ -22,7 +22,7 @@ then isolation, with biceps and triceps alternating at the end.
 - Mon Upper A: bench (top, back-off, wide) → barbell row → cable fly (2 sets) → pull-ups → DB lateral raise → reverse pec deck → EZ-bar curl → overhead rope extension → Bayesian cable curl → tricep pushdown
 - Wed Lower A: squat (top, back-off) → barbell Romanian deadlift (straps) → leg extension → seated leg curl → hip abductor → seated calf raise → decline sit-up (plate behind head) → cable crunch
 - Thu Upper B: bench (heavy, volume, wide) → lat pulldown → incline DB press → close-grip cable row → weighted dips → low-to-high cable fly → DB lateral raise → rope face pull → incline DB curl → EZ-bar incline skull crusher → Bayesian cable curl
-- Fri Lower B: DB shoulder press (first, fresh) → cable lateral raise → Bulgarian split squat → hip thrust → leg extension → seated leg curl → hip adductor → seated calf raise → DB shrug → back extension → decline sit-up (plate behind head) → cable crunch
+- Fri Lower B: DB shoulder press (first, fresh) → cable lateral raise → barbell lunge → hip thrust → leg extension → seated leg curl → hip adductor → seated calf raise → DB shrug → back extension → decline sit-up (plate behind head) → cable crunch
 
 Side delts get three days (Mon, Thu, Fri) because they were the one muscle under 10 hard sets a week.
 
@@ -33,6 +33,7 @@ Side delts get three days (Mon, Thu, Fri) because they were the one muscle under
 - Bodyweight-only (pull-ups): add 5 lbs once every set reaches the top of the rep range.
 - "Last time" shows the most recent time you did that exercise, any day. A skipped day (only 0 × 0 sets or just a note) doesn't count. Bench rows show every bench set from that day.
 - The Bayesian cable curl keeps its code name `Behind-the-body cable curl`, so Monday and Thursday share one history.
+- Friday's barbell lunge (since Nov 26, in place of the Bulgarian split squat) starts its own history: the split squat was logged as one dumbbell, the lunge is the whole bar. The split squat is still a swap.
 - Wednesday's RDL is the barbell one (`Romanian deadlift`) and carries on from those logs. The dumbbell RDL is still a swap option with its own history, because barbell numbers are the whole bar, not one dumbbell.
 
 ## Stats tab (v5.9)
