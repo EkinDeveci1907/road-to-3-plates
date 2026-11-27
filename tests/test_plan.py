@@ -24,17 +24,65 @@ def test_thursday_has_the_low_to_high_cable_fly_after_dips(open_app):
 
 
 @pytest.mark.unit
-def test_thursday_hammer_curl_is_now_the_bayesian_curl(open_app):
+@pytest.mark.parametrize("copy", ["eko", "ahmed", "shayan", "pavle"])
+def test_thursday_bayesian_curl_is_now_the_african_curl(open_app, copy):
     # Arrange
-    app = open_app("eko", sessions=[])
+    app = open_app(copy, sessions=[], storage=None if copy == "eko" else {"profile": {"bench": 135, "squat": 135, "start": [2026, 9, 26]}})
 
     # Act
     thursday = names(app, "upperB")
+    monday = names(app, "upperA")
 
-    # Assert: same exercise name as Monday's, so both days share one history
-    assert "Hammer curl" not in thursday
-    assert "Behind-the-body cable curl" in thursday
-    assert "Bayesian" in exercise(app, "upperB", "Behind-the-body cable curl")["label"]
+    # Assert: African curl is Thursday's last exercise, Monday keeps the Bayesian curl,
+    # and the Bayesian curl is still one tap away as a swap
+    assert "Behind-the-body cable curl" not in thursday
+    assert thursday[-1] == "African curl"
+    assert "Behind-the-body cable curl" in monday
+    assert "Bayesian" in exercise(app, "upperA", "Behind-the-body cable curl")["label"]
+    assert "Behind-the-body cable curl" in app.page.evaluate("() => window.__r3p.swaps('African curl')")
+
+
+@pytest.mark.unit
+def test_african_curl_does_not_carry_on_from_bayesian_numbers(open_app):
+    # Arrange: Bayesian curls were one cable handle; an African curl is one dumbbell
+    from conftest import workout
+    app = open_app("eko", sessions=[workout("2026-11-23", "upperA", "Upper A", [("Behind-the-body cable curl", [(33, 8), (27.5, 10)])])], today="2026-11-26")
+
+    # Act
+    target = app.target("upperB", "African curl", "2026-11-26")
+
+    # Assert: no suggested weight from the cable numbers; the first time you pick it
+    assert target is None
+
+
+@pytest.mark.unit
+def test_african_curl_counts_as_biceps(open_app):
+    app = open_app("eko", sessions=[])
+    assert app.page.evaluate("() => window.__r3p.muscleOf('African curl')") == "Biceps"
+
+
+@pytest.mark.system
+def test_logging_african_curls_on_thursday(open_app):
+    # Arrange: Thursday
+    app = open_app("eko", sessions=[], today="2026-11-26")
+    page = app.page
+    card = page.locator(".ex", has_text="African curl").first
+
+    # Act: open the card, log 20 x 10, save
+    card.locator(".ex__head").click()
+    row = card.locator(".set").first
+    row.locator('input[data-f="w"]').fill("20")
+    row.locator('input[data-f="r"]').fill("10")
+    row.locator('[data-act="check"]').click()
+    page.locator("#finishBtn").click()
+    page.locator('[data-act="confirmsave"]').click()
+    page.locator("#toastMsg", has_text="Upper B saved").wait_for()
+
+    # Assert
+    saved = [s for s in app.stored("sessions") if s["id"] == "2026-11-26-upperB"][0]
+    curl = [e for e in saved["exercises"] if e["name"] == "African curl"][0]
+    assert curl["sets"][0] == {"w": 20, "r": 10}
+    assert app.errors == []
 
 
 @pytest.mark.unit
